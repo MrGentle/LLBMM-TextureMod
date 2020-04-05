@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.572
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextureMod", "TextureMod\TextureMod.csproj", "{C2070354-D05F-4ED9-B31F-AD07EDBBB360}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C2070354-D05F-4ED9-B31F-AD07EDBBB360}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2070354-D05F-4ED9-B31F-AD07EDBBB360}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C2070354-D05F-4ED9-B31F-AD07EDBBB360}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C2070354-D05F-4ED9-B31F-AD07EDBBB360}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FD7C8516-3A42-44E8-B131-24EE3FF6C370}
+	EndGlobalSection
+EndGlobal
