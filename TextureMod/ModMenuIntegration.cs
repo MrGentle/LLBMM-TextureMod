@@ -16,7 +16,10 @@ namespace TextureMod
         public Dictionary<string, string> configBools = new Dictionary<string, string>();
         public Dictionary<string, string> configInts = new Dictionary<string, string>();
         public Dictionary<string, string> configSliders = new Dictionary<string, string>();
+        public Dictionary<string, string> configHeaders = new Dictionary<string, string>();
+        public Dictionary<string, string> configGaps = new Dictionary<string, string>();
         public Dictionary<string, string> configText = new Dictionary<string, string>();
+        public List<string> writeQueue = new List<string>();
 
         private void Start()
         {
@@ -31,7 +34,7 @@ namespace TextureMod
             {
                 if (mmAdded == false)
                 {
-                    mm.mods.Add(gameObject.name);
+                    mm.mods.Add(base.gameObject.name);
                     mmAdded = true;
                 }
             }
@@ -39,19 +42,55 @@ namespace TextureMod
 
         private void InitConfig()
         {
-            configKeys.Add("(key)holdToEnableSkinChanger", "LeftShift");
-            configKeys.Add("(key)holdToEnableSkinChanger2", "RightShift");
-            configKeys.Add("(key)setCustomSkin", "Mouse0");
-            configKeys.Add("(key)cancelOpponentCustomSkin", "A");
-            configBools.Add("(bool)noHoldMode", "false");
-            configBools.Add("(bool)neverApplyOpponentsSkin", "false");
+            /*
+             * Mod menu now uses a single function to add options etc. (AddToWriteQueue)
+             * your specified options should be added to this function in the same format as stated under
+             * 
+            Keybindings:
+            AddToWriteQueue("(key)keyName", "LeftShift");                                       value can be: Any KeyCode as a string e.g. "LeftShift"
 
-            configText.Add("(text)text1", "This mod was written by MrGentle");
-            configText.Add("(text)text2", " ");
-            configText.Add("(text)text3", "Wondering how to assign skins and in what part of the game you can do so?");
-            configText.Add("(text)text4", "If you don't have 'No Hold Mode' set to true, simply hold one of the 'Hold To Enable Skin Changer' buttons and press the assigned 'Set Custom Skin button'");
-            configText.Add("(text)text5", "Skins can be assigned in Ranked Lobbies, 1v1 Lobbies, FFA Lobbies(Only for player 1 and 2) and in the skin unlock screen for a character");
-            ModMenu.Instance.WriteIni(gameObject.name, configKeys, configBools, configInts, configSliders, configText);
+            Options:
+            AddToWriteQueue("(bool)boolName", "true");                                          value can be: ["true" | "false"]
+            AddToWriteQueue("(int)intName", "27313");                                           value can be: any number as a string. For instance "123334"
+            AddToWriteQueue("(slider)sliderName", "50|0|100");                                  value must be: "Default value|Min Value|MaxValue"
+            AddToWriteQueue("(header)headerName", "Header Text");                               value can be: Any string
+            AddToWriteQueue("(gap)gapName", "identifier");                                      value does not matter, just make name and value unique from other gaps
+
+            ModInformation:
+            AddToWriteQueue("(text)text1", "Descriptive text");                                  value can be: Any string
+            */
+
+
+            // Insert your options here \/
+            AddToWriteQueue("(key)holdToEnableSkinChanger", "LeftShift");
+            AddToWriteQueue("(key)holdToEnableSkinChanger2", "RightShift");
+            AddToWriteQueue("(key)setCustomSkin", "Mouse0");
+            AddToWriteQueue("(key)cancelOpponentCustomSkin", "A");
+            AddToWriteQueue("(key)reloadEntireSkinLibrary", "F9");
+            AddToWriteQueue("(key)reloadCustomSkin", "F5");
+
+            AddToWriteQueue("(header)h1", "Lobby Settings:");
+            AddToWriteQueue("(bool)noHoldMode", "false");
+            AddToWriteQueue("(bool)neverApplyOpponentsSkin", "false");
+            AddToWriteQueue("(bool)lockButtonsOnRandom", "true");
+            AddToWriteQueue("(gap)1", "1");
+            AddToWriteQueue("(header)h2", "Real-time Skin editing:");
+            AddToWriteQueue("(bool)reloadCustomSkinOnInterval", "true");
+            AddToWriteQueue("(slider)skinReloadIntervalInFrames", "60|10|600");
+            AddToWriteQueue("(gap)2", "2");
+            AddToWriteQueue("(header)h3", "General:");
+            AddToWriteQueue("(bool)showDebugInfo", "false");
+
+            AddToWriteQueue("(text)text3", "Wondering how to assign skins and in what part of the game you can do so?");
+            AddToWriteQueue("(text)text4", "Simply hold one of the 'Hold To Enable Skin Changer' buttons and press the assigned 'Set Custom Skin button' (If 'No Hold Mode' is off)");
+            AddToWriteQueue("(text)text5", "Skins can be assigned in Ranked Lobbies, 1v1 Lobbies, FFA Lobbies(Only for player 1 and 2) and in the skin unlock screen for a character");
+            AddToWriteQueue("(text)text6", "If you select random in the lobby and try to assign a custom skin you will be given a random character and random skin. In online lobbies you will be set to ready, and your buttons will become unavailable unless you've deactivated 'Lock Buttons On Random'");
+            AddToWriteQueue("(text)text7", " ");
+            AddToWriteQueue("(text)text8", "If you wish to real time edit your skins, use the F5 button to reload your skin whenever you're in training mode or in the character skin unlock screen");
+            AddToWriteQueue("(text)text9", "You can also enable the interval mode and have it automatically reload the current custom skin so and so often. Great for dual screen, or windowed mode setups (Does not work in training mode)");
+            AddToWriteQueue("(text)text1", "This mod was written by MrGentle");
+            ModMenu.Instance.WriteIni(gameObject.name, writeQueue, configKeys, configBools, configInts, configSliders, configHeaders, configGaps, configText);
+            writeQueue.Clear();
         }
 
         public void ReadIni()
@@ -61,6 +100,8 @@ namespace TextureMod
             configKeys.Clear();
             configInts.Clear();
             configSliders.Clear();
+            configHeaders.Clear();
+            configGaps.Clear();
             configText.Clear();
             foreach (string line in lines)
             {
@@ -84,11 +125,60 @@ namespace TextureMod
                     string[] split = line.Split('=');
                     configSliders.Add(split[0], split[1]);
                 }
+                else if (line.StartsWith("(header)"))
+                {
+                    string[] split = line.Split('=');
+                    configHeaders.Add(split[0], split[1]);
+                }
+                else if (line.StartsWith("(gap)"))
+                {
+                    string[] split = line.Split('=');
+                    configGaps.Add(split[0], split[1]);
+                }
                 else if (line.StartsWith("(text)"))
                 {
                     string[] split = line.Split('=');
                     configText.Add(split[0], split[1]);
                 }
+            }
+        }
+
+        public void AddToWriteQueue(string key, string value)
+        {
+            if (key.StartsWith("(key)"))
+            {
+                configKeys.Add(key, value);
+                writeQueue.Add(key);
+            }
+            else if (key.StartsWith("(bool)"))
+            {
+                configBools.Add(key, value);
+                writeQueue.Add(key);
+            }
+            else if (key.StartsWith("(int)"))
+            {
+                configInts.Add(key, value);
+                writeQueue.Add(key);
+            }
+            else if (key.StartsWith("(slider)"))
+            {
+                configSliders.Add(key, value);
+                writeQueue.Add(key);
+            }
+            else if (key.StartsWith("(header)"))
+            {
+                configHeaders.Add(key, value);
+                writeQueue.Add(key);
+            }
+            else if (key.StartsWith("(gap)"))
+            {
+                configGaps.Add(key, value);
+                writeQueue.Add(key);
+            }
+            else if (key.StartsWith("(text)"))
+            {
+                configText.Add(key, value);
+                writeQueue.Add(key);
             }
         }
 

@@ -14,7 +14,7 @@ namespace TextureMod
         private static TextureMod instance = null;
         public static TextureMod Instance { get { return instance; } }
         public static void Initialize() { GameObject gameObject = new GameObject("TextureMod"); TextureMod modscript = gameObject.AddComponent<TextureMod>(); DontDestroyOnLoad(gameObject); instance = modscript; }
-        private const string modVersion = "v1.2";
+        private const string modVersion = "v1.3";
         private const string repositoryOwner = "MrGentle";
         private const string repositoryName = "LLBMM-TextureMod";
 
@@ -24,6 +24,7 @@ namespace TextureMod
         public ModMenuIntegration MMI = null;
         public TextureLoader tl = null;
         public ExchangeClient ec = null;
+        public ModDebugging md = null;
         public string retSkin = "";
 
         public static List<string> ownedDLCs = new List<string>();
@@ -42,6 +43,7 @@ namespace TextureMod
             if (tl == null) { tl = gameObject.AddComponent<TextureLoader>(); }
             if (tc == null) { tc = gameObject.AddComponent<TextureChanger>(); }
             if (ec == null) { ec = gameObject.AddComponent<ExchangeClient>(); }
+            if (md == null) { md = gameObject.AddComponent<ModDebugging>(); }
         }
 
 

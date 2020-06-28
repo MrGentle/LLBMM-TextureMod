@@ -43,5 +43,49 @@ namespace TextureMod
 
             return tex;
         }
+
+        public static Texture2D ReloadSkin(Character _character, Texture2D _texture)
+        {
+            TextureLoader TL = TextureMod.Instance.tl;
+            Texture2D newTex = null;
+
+            string characterDirectory = "";
+            string skinName = "";
+
+            foreach (string path in TL.chars) if (TL.StringToChar(Path.GetFileName(path)) == _character) characterDirectory = path;
+            Debug.Log("characterDirectory:" + characterDirectory);
+
+            foreach (var skin in TL.characterTextures[_character]) if (skin.Value == _texture) skinName = skin.Key;
+
+            string oldSkinName = skinName;
+
+            if (skinName.Contains(" by "))
+            {
+                int i = skinName.IndexOf(" by ");
+                if (i >= 0) skinName = skinName.Remove(i);
+            }
+
+            foreach (string dir in Directory.GetDirectories(characterDirectory))
+            {
+                foreach (string file in Directory.GetFiles(dir))
+                {
+                    if (Path.GetFileName(file) == skinName)
+                    {
+                        newTex = LoadPNG(file);
+                        TL.characterTextures[_character][oldSkinName] = newTex;
+                    }
+                }
+            }
+
+            foreach (string file in Directory.GetFiles(characterDirectory))
+            {
+                if (Path.GetFileName(file) == skinName)
+                {
+                    newTex = LoadPNG(file);
+                    TL.characterTextures[_character][skinName] = newTex;
+                }
+            }
+            return newTex;
+        }
     }
 }

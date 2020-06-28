@@ -37,7 +37,7 @@
     </Reference>
     <Reference Include="ModMenu, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Desktop\New folder (2)\ModMenu\ModMenu.dll</HintPath>
+      <HintPath>F:\Games\SteamLibrary\steamapps\common\LLBlaze\LLBlaze_Data\Managed\ModMenu.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -309,6 +309,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ExchangeClient.cs" />
+    <Compile Include="ModDebugging.cs" />
     <Compile Include="ModMenuIntegration.cs" />
     <Compile Include="TextureChanger.cs" />
     <Compile Include="TextureHelper.cs" />

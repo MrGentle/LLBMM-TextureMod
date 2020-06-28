@@ -9,13 +9,21 @@ namespace TextureMod
     public class TextureLoader : MonoBehaviour
     {
         private static string resourceFolder = Application.dataPath.Replace("/", @"\") + @"\Managed\TextureModResources\Images\Characters\";
-        private List<string> chars = new List<string>();
+        public List<string> chars = new List<string>();
         public Dictionary<Character, Dictionary<string, Texture2D>> characterTextures = new Dictionary<Character, Dictionary<string, Texture2D>>();
 
         public bool loadingExternalFiles = true;
 
         private void Start()
         {
+            LoadLibrary();
+        }
+
+        public void LoadLibrary()
+        {
+            chars.Clear();
+            characterTextures.Clear();
+
             foreach (string path in Directory.GetDirectories(resourceFolder.Replace("/", @"\")))
             {
                 chars.Add(path);
@@ -24,6 +32,13 @@ namespace TextureMod
             foreach (string character in chars)
             {
                 Dictionary<string, Texture2D> skins = new Dictionary<string, Texture2D>();
+                foreach (string dir in Directory.GetDirectories(character))
+                {
+                    foreach (string file in Directory.GetFiles(dir))
+                    {
+                        skins.Add(Path.GetFileName(file) + " by " + Path.GetFileName(dir), TextureHelper.LoadPNG(file));
+                    }
+                }
                 foreach (string file in Directory.GetFiles(character))
                 {
                     skins.Add(Path.GetFileName(file), TextureHelper.LoadPNG(file));
@@ -34,7 +49,7 @@ namespace TextureMod
             loadingExternalFiles = false;
         }
 
-        private Character StringToChar(string charString)
+        public Character StringToChar(string charString)
         {
             Character ret = Character.NONE;
             switch (charString)
@@ -74,6 +89,9 @@ namespace TextureMod
                     break;
                 case "DUST&ASHES":
                     ret = Character.BAG;
+                    break;
+                case "CACTUAR":
+                    ret = (Character)50;
                     break;
                 default:
                     ret = Character.NONE;
