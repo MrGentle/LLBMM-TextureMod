@@ -1,6 +1,7 @@
 ﻿using LLScreen;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 
 
@@ -13,6 +14,7 @@ namespace TextureMod
         public Dictionary<Character, Dictionary<string, Texture2D>> characterTextures = new Dictionary<Character, Dictionary<string, Texture2D>>();
 
         public bool loadingExternalFiles = true;
+        public bool hasCactuar = false;
 
         private void Start()
         {
@@ -22,6 +24,7 @@ namespace TextureMod
         public void LoadLibrary()
         {
             chars.Clear();
+            Resources.UnloadUnusedAssets();
             characterTextures.Clear();
 
             foreach (string path in Directory.GetDirectories(resourceFolder.Replace("/", @"\")))
@@ -36,12 +39,59 @@ namespace TextureMod
                 {
                     foreach (string file in Directory.GetFiles(dir))
                     {
-                        skins.Add(Path.GetFileName(file) + " by " + Path.GetFileName(dir), TextureHelper.LoadPNG(file));
+                        string cleanfile = Path.GetFileName(file);
+                        if (cleanfile.Contains("#"))
+                        {
+                            List<char> charsFile = cleanfile.ToCharArray().ToList();
+                            for (var i = 0; i < charsFile.Count; i++)
+                            {
+                                if (charsFile[0] != '#') charsFile.RemoveAt(0);
+                                else
+                                {
+                                    charsFile.RemoveAt(0);
+                                    break;
+                                }
+                            }
+                            cleanfile = new string(charsFile.ToArray());
+                        }
+
+                        string cleanDir = Path.GetFileName(dir);
+                        if (cleanDir.Contains("#"))
+                        {   
+                            List<char> charsDir = cleanDir.ToCharArray().ToList();
+                            for (var i = 0; i < charsDir.Count; i++)
+                            {
+                                if (charsDir[0] != '#') charsDir.RemoveAt(0);
+                                else
+                                {
+                                    charsDir.RemoveAt(0);
+                                    break;
+                                }
+                            }
+                            cleanDir = new string(charsDir.ToArray());
+                        }
+
+                        skins.Add(cleanfile + " by " + cleanDir, TextureHelper.LoadPNG(file));
                     }
                 }
                 foreach (string file in Directory.GetFiles(character))
                 {
-                    skins.Add(Path.GetFileName(file), TextureHelper.LoadPNG(file));
+                    string cleanfile = Path.GetFileName(file);
+                    if (cleanfile.Contains("#"))
+                    {
+                        List<char> charsFile = cleanfile.ToCharArray().ToList();
+                        for (var i = 0; i < charsFile.Count; i++)
+                        {
+                            if (charsFile[0] != '#') charsFile.RemoveAt(0);
+                            else
+                            {
+                                charsFile.RemoveAt(0);
+                                break;
+                            }
+                        }
+                        cleanfile = new string(charsFile.ToArray());
+                    }
+                    skins.Add(cleanfile, TextureHelper.LoadPNG(file));
                 }
                 characterTextures.Add(StringToChar(Path.GetFileName(character)), skins);
             }
@@ -91,6 +141,7 @@ namespace TextureMod
                     ret = Character.BAG;
                     break;
                 case "CACTUAR":
+                    hasCactuar = true;
                     ret = (Character)50;
                     break;
                 default:

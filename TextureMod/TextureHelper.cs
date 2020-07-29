@@ -85,6 +85,8 @@ namespace TextureMod
                     TL.characterTextures[_character][skinName] = newTex;
                 }
             }
+
+            Resources.UnloadUnusedAssets();
             return newTex;
         }
     }

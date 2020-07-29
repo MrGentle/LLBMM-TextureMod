@@ -14,7 +14,7 @@ namespace TextureMod
         private static TextureMod instance = null;
         public static TextureMod Instance { get { return instance; } }
         public static void Initialize() { GameObject gameObject = new GameObject("TextureMod"); TextureMod modscript = gameObject.AddComponent<TextureMod>(); DontDestroyOnLoad(gameObject); instance = modscript; }
-        private const string modVersion = "v1.3";
+        private const string modVersion = "v1.4.0";
         private const string repositoryOwner = "MrGentle";
         private const string repositoryName = "LLBMM-TextureMod";
 
@@ -26,6 +26,8 @@ namespace TextureMod
         public ExchangeClient ec = null;
         public ModDebugging md = null;
         public string retSkin = "";
+        public EffectChanger effectChanger = null;
+        public ShowcaseStudio showcaseStudio = null;
 
         public static List<string> ownedDLCs = new List<string>();
         public static bool hasDLC = false;
@@ -44,6 +46,8 @@ namespace TextureMod
             if (tc == null) { tc = gameObject.AddComponent<TextureChanger>(); }
             if (ec == null) { ec = gameObject.AddComponent<ExchangeClient>(); }
             if (md == null) { md = gameObject.AddComponent<ModDebugging>(); }
+            if (effectChanger == null) {effectChanger = gameObject.AddComponent<EffectChanger>(); }
+            if (showcaseStudio == null) showcaseStudio = gameObject.AddComponent<ShowcaseStudio>();
         }
 
 
@@ -76,6 +80,7 @@ namespace TextureMod
             if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1204070))) ownedDLCs.Add("Raptor");
             if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1174410))) ownedDLCs.Add("Dust&Ashes");
             if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(991870))) ownedDLCs.Add("Doombox");
+            if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1269880))) ownedDLCs.Add("Toxic");
         }
     }
 }

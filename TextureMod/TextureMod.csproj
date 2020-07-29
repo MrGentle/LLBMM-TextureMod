@@ -308,9 +308,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CustomStyle.cs" />
+    <Compile Include="EffectChanger.cs" />
     <Compile Include="ExchangeClient.cs" />
     <Compile Include="ModDebugging.cs" />
     <Compile Include="ModMenuIntegration.cs" />
+    <Compile Include="ShowcaseStudio.cs" />
+    <Compile Include="SmoothMouseLook.cs" />
     <Compile Include="TextureChanger.cs" />
     <Compile Include="TextureHelper.cs" />
     <Compile Include="TextureLoader.cs" />
