@@ -35,7 +35,7 @@ namespace TextureMod
         private List<Character> playersInCurrentGame = new List<Character>();
 
 
-        public Color32[] originalDNAColors = new Color32[AOIOFOIHOCJ.outfitOutlineColors.Length];
+        public Color32[] originalDNAColors = new Color32[BagPlayer.outfitOutlineColors.Length];
 
         #endregion
         #region Config Fields
@@ -1369,6 +1369,12 @@ namespace TextureMod
                             break;
                         case Character.GRAF:
                             foreach (string DLC in TextureMod.ownedDLCs) if (DLC == "Toxic") proceed = true;
+                            break;
+                        case Character.ROBOT:
+                            foreach (string DLC in TextureMod.ownedDLCs) if (DLC == "Switch") proceed = true;
+                            break;
+                        case Character.CROC:
+                            foreach (string DLC in TextureMod.ownedDLCs) if (DLC == "Latch") proceed = true;
                             break;
                         default:
                             proceed = false; 
