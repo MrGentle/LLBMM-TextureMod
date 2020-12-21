@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using GameplayEntities;
 using System.Linq;
 using UnityEngine;
-using GameplayEntities;
-using LLScreen;
-using LLGUI;
-using LLHandlers;
 
 
 namespace TextureMod
@@ -43,6 +38,8 @@ namespace TextureMod
         byte parryThirdColorR = 0;
         byte parryThirdColorG = 0;
         byte parryThirdColorB = 0;
+
+        bool enableCustomParry;
         #endregion
 
 
@@ -70,6 +67,8 @@ namespace TextureMod
             if (MMI == null) MMI = TextureMod.Instance.MMI;
             if (TextureMod.Instance.tc.InMenu())
             {
+                enableCustomParry = MMI.GetTrueFalse(MMI.configBools["(bool)enableCustomParryAndClash"]);
+
                 parryFirstColorR = (byte)MMI.GetSliderValue("(slider)parryFirstColorR");
                 parryFirstColorG = (byte)MMI.GetSliderValue("(slider)parryFirstColorG");
                 parryFirstColorB = (byte)MMI.GetSliderValue("(slider)parryFirstColorB");
@@ -86,38 +85,19 @@ namespace TextureMod
 
         private void Update()
         {
-            MeshRenderer[] mrs = FindObjectsOfType<MeshRenderer>();
-            foreach (MeshRenderer mr in mrs)
+            if (enableCustomParry == true)
             {
-                if (mr.name == "parryVisual")
+                MeshRenderer[] mrs = FindObjectsOfType<MeshRenderer>();
+                foreach (MeshRenderer mr in mrs)
                 {
-                    mr.material.mainTexture = parryActiveBG;
-                    Material m1 = mr.material;
-                    Material m2 = new Material(mr.material.shader);
-                    Material m3 = new Material(mr.material.shader);
-                    m2.mainTexture = parryActiveMG;
-                    m3.mainTexture = parryActiveFG;
-                    Material[] mArray = new Material[] { m1, m2, m3 };
-                    mr.materials = mArray;
-                    mr.materials[0].color = new Color32(parryFirstColorR, parryFirstColorG, parryFirstColorB, 255);
-                    mr.materials[1].color = new Color32(parrySecondColorR, parrySecondColorG, parrySecondColorB, 255);
-                    mr.materials[2].color = new Color32(parryThirdColorR, parryThirdColorG, parryThirdColorB, 255);
-                }
-            }
-
-            VisualEntity[] ves = FindObjectsOfType<VisualEntity>();
-            foreach(VisualEntity ve in ves)
-            {
-                if (ve.name == "parryEnd")
-                {
-                    foreach (Renderer mr in ve.GetComponentsInChildren<Renderer>())
+                    if (mr.name == "parryVisual")
                     {
-                        mr.material.mainTexture = parryEndBG;
+                        mr.material.mainTexture = parryActiveBG;
                         Material m1 = mr.material;
                         Material m2 = new Material(mr.material.shader);
                         Material m3 = new Material(mr.material.shader);
-                        m2.mainTexture = parryEndMG;
-                        m3.mainTexture = parryEndFG;
+                        m2.mainTexture = parryActiveMG;
+                        m3.mainTexture = parryActiveFG;
                         Material[] mArray = new Material[] { m1, m2, m3 };
                         mr.materials = mArray;
                         mr.materials[0].color = new Color32(parryFirstColorR, parryFirstColorG, parryFirstColorB, 255);
@@ -126,37 +106,59 @@ namespace TextureMod
                     }
                 }
 
-
-                if (ve.name == "parrySuccess")
+                VisualEntity[] ves = FindObjectsOfType<VisualEntity>();
+                foreach (VisualEntity ve in ves)
                 {
-                    Renderer mr = ve.GetComponentsInChildren<Renderer>().First();
-                    mr.material.mainTexture = parrySuccessBG;
-                    Material m1 = mr.material;
-                    Material m2 = new Material(mr.material.shader);
-                    Material m3 = new Material(mr.material.shader);
-                    m2.CopyPropertiesFromMaterial(m1);
-                    m3.CopyPropertiesFromMaterial(m1);
-                    m2.mainTexture = parrySuccessMG;
-                    m3.mainTexture = parrySuccessFG;
-                    Material[] mArray = new Material[] { m1, m2, m3 };
-                    mr.materials = mArray;
-                    mr.materials[0].color = new Color32(parryFirstColorR, parryFirstColorG, parryFirstColorB, 255);
-                    mr.materials[1].color = new Color32(parrySecondColorR, parrySecondColorG, parrySecondColorB, 255);
-                    mr.materials[2].color = new Color32(parryThirdColorR, parryThirdColorG, parryThirdColorB, 255);
-                }
+                    if (ve.name == "parryEnd")
+                    {
+                        foreach (Renderer mr in ve.GetComponentsInChildren<Renderer>())
+                        {
+                            mr.material.mainTexture = parryEndBG;
+                            Material m1 = mr.material;
+                            Material m2 = new Material(mr.material.shader);
+                            Material m3 = new Material(mr.material.shader);
+                            m2.mainTexture = parryEndMG;
+                            m3.mainTexture = parryEndFG;
+                            Material[] mArray = new Material[] { m1, m2, m3 };
+                            mr.materials = mArray;
+                            mr.materials[0].color = new Color32(parryFirstColorR, parryFirstColorG, parryFirstColorB, 255);
+                            mr.materials[1].color = new Color32(parrySecondColorR, parrySecondColorG, parrySecondColorB, 255);
+                            mr.materials[2].color = new Color32(parryThirdColorR, parryThirdColorG, parryThirdColorB, 255);
+                        }
+                    }
 
-                if (ve.name == "clashEffect")
-                {
-                    Renderer mr = ve.GetComponentsInChildren<Renderer>().First();
-                    mr.material.mainTexture = clashBG;
-                    Material m1 = mr.material;
-                    Material m2 = new Material(mr.material.shader);
-                    m2.CopyPropertiesFromMaterial(m1);
-                    m2.mainTexture = clashFG;
-                    Material[] mArray = new Material[] { m1, m2 };
-                    mr.materials = mArray;
-                    mr.materials[0].color = new Color32(parryFirstColorR, parryFirstColorG, parryFirstColorB, 255);
-                    mr.materials[1].color = new Color32(parryThirdColorR, parryThirdColorG, parryThirdColorB, 255);
+
+                    if (ve.name == "parrySuccess")
+                    {
+                        Renderer mr = ve.GetComponentsInChildren<Renderer>().First();
+                        mr.material.mainTexture = parrySuccessBG;
+                        Material m1 = mr.material;
+                        Material m2 = new Material(mr.material.shader);
+                        Material m3 = new Material(mr.material.shader);
+                        m2.CopyPropertiesFromMaterial(m1);
+                        m3.CopyPropertiesFromMaterial(m1);
+                        m2.mainTexture = parrySuccessMG;
+                        m3.mainTexture = parrySuccessFG;
+                        Material[] mArray = new Material[] { m1, m2, m3 };
+                        mr.materials = mArray;
+                        mr.materials[0].color = new Color32(parryFirstColorR, parryFirstColorG, parryFirstColorB, 255);
+                        mr.materials[1].color = new Color32(parrySecondColorR, parrySecondColorG, parrySecondColorB, 255);
+                        mr.materials[2].color = new Color32(parryThirdColorR, parryThirdColorG, parryThirdColorB, 255);
+                    }
+
+                    if (ve.name == "clashEffect")
+                    {
+                        Renderer mr = ve.GetComponentsInChildren<Renderer>().First();
+                        mr.material.mainTexture = clashBG;
+                        Material m1 = mr.material;
+                        Material m2 = new Material(mr.material.shader);
+                        m2.CopyPropertiesFromMaterial(m1);
+                        m2.mainTexture = clashFG;
+                        Material[] mArray = new Material[] { m1, m2 };
+                        mr.materials = mArray;
+                        mr.materials[0].color = new Color32(parryFirstColorR, parryFirstColorG, parryFirstColorB, 255);
+                        mr.materials[1].color = new Color32(parryThirdColorR, parryThirdColorG, parryThirdColorB, 255);
+                    }
                 }
             }
         }
