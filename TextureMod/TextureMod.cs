@@ -14,7 +14,7 @@ namespace TextureMod
         private static TextureMod instance = null;
         public static TextureMod Instance { get { return instance; } }
         public static void Initialize() { GameObject gameObject = new GameObject("TextureMod"); TextureMod modscript = gameObject.AddComponent<TextureMod>(); DontDestroyOnLoad(gameObject); instance = modscript; }
-        private const string modVersion = "1.4.4";
+        private const string modVersion = "1.4.5";
         private const string repositoryOwner = "Daioutzu";
         private const string repositoryName = "LLBMM-TextureMod";
 
@@ -85,6 +85,7 @@ namespace TextureMod
             if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1431701))) ownedDLCs.Add("Grid");
             if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1431702))) ownedDLCs.Add("Switch");
             if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1399790))) ownedDLCs.Add("Sonata");
+            if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1431711))) ownedDLCs.Add("Jet");
         }
     }
 }

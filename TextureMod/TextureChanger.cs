@@ -1400,10 +1400,12 @@ namespace TextureMod
                         case Character.ELECTRO:
                             foreach (string DLC in TextureMod.ownedDLCs) if (DLC == "Grid") proceed = true;
                             break;
+                        case Character.SKATE:
+                            foreach (string DLC in TextureMod.ownedDLCs) if (DLC == "Jet") proceed = true;
+                            break;
                         default:
                             proceed = false;
                             break;
-
                     }
 
                     if (proceed)
