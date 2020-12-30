@@ -1826,12 +1826,26 @@ namespace TextureMod
         #region Jet Effects
         public void JetIngameEffects()
         {
-            if (mainBall.GetLastPlayerHitter() == localGamePlayerEntity && localTex != null) AssignBubbleVisual(localTex);
-            if (mainBall.GetLastPlayerHitter() == opponentPlayerEntity && opponentCustomTexture != null) AssignBubbleVisual(opponentCustomTexture);
+            if (mainBall.GetLastPlayerHitter() == localGamePlayerEntity && localTex != null) AssignBubbleVisual(localGamePlayerEntity.variant, localTex);
+            if (mainBall.GetLastPlayerHitter() == opponentPlayerEntity && opponentCustomTexture != null) AssignBubbleVisual(opponentPlayerEntity.variant, opponentCustomTexture);
         }
 
-        public void AssignBubbleVisual(Texture2D tex)
+        public void AssignBubbleVisual(CharacterVariant variant, Texture2D tex)
         {
+            Color pixelColor = new Color(0, 1, 1);
+            if (variant <= CharacterVariant.ALT6)
+            {
+                pixelColor = tex.GetPixel(59, 326);
+            }
+            else if (variant == CharacterVariant.MODEL_ALT || variant == CharacterVariant.MODEL_ALT2)
+            {
+                pixelColor = tex.GetPixel(59, 306);
+            }
+            else if (variant == CharacterVariant.MODEL_ALT3 || variant == CharacterVariant.MODEL_ALT4)
+            {
+                pixelColor = tex.GetPixel(59, 388);
+            }
+
             MeshRenderer[] mrs = FindObjectsOfType<MeshRenderer>();
             foreach (MeshRenderer mr in mrs)
             {
@@ -1843,7 +1857,7 @@ namespace TextureMod
                     m2.mainTexture = bubbleFG;
                     Material[] mArray = new Material[] { m1, m2 };
                     mr.materials = mArray;
-                    mr.materials[0].color = tex.GetPixel(59, 326); break;
+                    mr.materials[0].color = pixelColor; break;
                 }
             }
 
@@ -1860,7 +1874,7 @@ namespace TextureMod
                         m2.mainTexture = bubblePopBG;
                         Material[] mArray = new Material[] { m1, m2 };
                         r.materials = mArray;
-                        r.materials[1].color = tex.GetPixel(59, 326); break;
+                        r.materials[1].color = pixelColor; break;
                     }
                 }
             }
