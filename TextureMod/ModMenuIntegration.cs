@@ -90,6 +90,7 @@ namespace TextureMod
             AddToWriteQueue("(bool)showDebugInfo", "false");
             AddToWriteQueue("(gap)3", "2");
             AddToWriteQueue("(header)h4", "Parry Color:");
+            AddToWriteQueue("(bool)enableCustomParryAndClash", "true");
             AddToWriteQueue("(slider)parryFirstColorR", "2|0|255");
             AddToWriteQueue("(slider)parryFirstColorG", "205|0|255");
             AddToWriteQueue("(slider)parryFirstColorB", "239|0|255");

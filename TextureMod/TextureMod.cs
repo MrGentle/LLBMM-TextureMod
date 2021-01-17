@@ -14,8 +14,8 @@ namespace TextureMod
         private static TextureMod instance = null;
         public static TextureMod Instance { get { return instance; } }
         public static void Initialize() { GameObject gameObject = new GameObject("TextureMod"); TextureMod modscript = gameObject.AddComponent<TextureMod>(); DontDestroyOnLoad(gameObject); instance = modscript; }
-        private const string modVersion = "v1.4.0";
-        private const string repositoryOwner = "MrGentle";
+        private const string modVersion = "1.4.5";
+        private const string repositoryOwner = "Daioutzu";
         private const string repositoryName = "LLBMM-TextureMod";
 
         public string debug = "";
@@ -79,8 +79,13 @@ namespace TextureMod
             if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1244880))) ownedDLCs.Add("Dice");
             if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1204070))) ownedDLCs.Add("Raptor");
             if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1174410))) ownedDLCs.Add("Dust&Ashes");
-            if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(991870))) ownedDLCs.Add("Doombox");
+            if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(991870)) || AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1399791))) ownedDLCs.Add("Doombox");
             if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1269880))) ownedDLCs.Add("Toxic");
+            if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1431710))) ownedDLCs.Add("Latch");
+            if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1431701))) ownedDLCs.Add("Grid");
+            if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1431702))) ownedDLCs.Add("Switch");
+            if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1399790))) ownedDLCs.Add("Sonata");
+            if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1431711))) ownedDLCs.Add("Jet");
         }
     }
 }

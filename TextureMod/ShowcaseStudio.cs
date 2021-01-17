@@ -1,11 +1,7 @@
-﻿using System;
+﻿using LLScreen;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
-using GameplayEntities;
-using LLScreen;
-using LLGUI;
-using LLHandlers;
 
 namespace TextureMod
 {
@@ -56,8 +52,9 @@ namespace TextureMod
             {
                 GUI.skin.box.fontSize = 18;
                 GUI.Window(777, new Rect(10, 10, Screen.width / 7, Screen.height - 20), new GUI.WindowFunction(AnimationSelectionWindow), "Showcase Studio", CustomStyle.windStyle);
-                if (showControls) GUI.Window(778, new Rect(20 + (Screen.width/7), 10, 10 + ((Screen.width / 7)*2), Screen.height/3), new GUI.WindowFunction(ControlsWindow), "Controls", CustomStyle.windStyle);
-            } else
+                if (showControls) GUI.Window(778, new Rect(20 + (Screen.width / 7), 10, 10 + ((Screen.width / 7) * 2), Screen.height / 3), new GUI.WindowFunction(ControlsWindow), "Controls", CustomStyle.windStyle);
+            }
+            else
             {
                 if (SUS != null && !hideGUI)
                 {
@@ -67,12 +64,23 @@ namespace TextureMod
             }
         }
 
+        bool initCustomStyle = false;
+
+        void Start()
+        {
+
+        }
+
         private void Update()
         {
             if (SUS == null)
             {
                 SUS = FindObjectOfType<ScreenUnlocksSkins>();
-                CustomStyle.InitStyle();
+                if (initCustomStyle == false)
+                {
+                    CustomStyle.InitStyle();
+                    initCustomStyle = true;
+                }
             }
             else
             {
@@ -258,7 +266,7 @@ namespace TextureMod
                         characterModel.transform.Rotate(Vector3.right * speed);
                         characterModel.transform.Rotate(Vector3.forward * speed);
                     }
-                    if (Input.GetKey(KeyCode.W)) 
+                    if (Input.GetKey(KeyCode.W))
                     {
                         characterModel.transform.Rotate(-Vector3.right * speed);
                         characterModel.transform.Rotate(-Vector3.forward * speed);
@@ -284,97 +292,98 @@ namespace TextureMod
         private void AnimationSelectionWindow(int winID)
         {
             GUILayout.BeginVertical();
-                GUILayout.Space(30);
-                GUILayout.Box("General Options");
-                    GUILayout.BeginHorizontal();
-                    GUILayout.Label("Show controls: ");
-                    if (GUILayout.Button(showControls.ToString()))
-                    {
-                        showControls = !showControls;
-                    }
-                    GUILayout.EndHorizontal();
-                GUILayout.BeginHorizontal();
-                    GUILayout.Label("Skin Name: ");
-                    GUILayout.Label(skinName);
-                GUILayout.EndHorizontal();
+            GUILayout.Space(30);
+            GUILayout.Box("General Options");
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Show controls: ");
+            if (GUILayout.Button(showControls.ToString()))
+            {
+                showControls = !showControls;
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Skin Name: ");
+            GUILayout.Label(skinName);
+            GUILayout.EndHorizontal();
 
-                GUILayout.BeginHorizontal();
-                    GUILayout.Label("Skin Refresh: ");
-                    if (!refreshMode) GUILayout.Label("Off");
-                    else GUILayout.Label("On [" + refreshTimer.ToString() + "]");
-                GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Skin Refresh: ");
+            if (!refreshMode) GUILayout.Label("Off");
+            else GUILayout.Label("On [" + refreshTimer.ToString() + "]");
+            GUILayout.EndHorizontal();
 
-                GUILayout.Space(20);
+            GUILayout.Space(20);
 
-                GUILayout.Box("BG and Lighting Options");
-                GUILayout.BeginHorizontal();
-                    GUILayout.Label("Enable Lighting: ");
-                    if (GUILayout.Button(enableLight.ToString()))
-                    {
-                        enableLight = !enableLight;
-                    }
-                GUILayout.EndHorizontal();
+            GUILayout.Box("BG and Lighting Options");
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Enable Lighting: ");
+            if (GUILayout.Button(enableLight.ToString()))
+            {
+                enableLight = !enableLight;
+            }
+            GUILayout.EndHorizontal();
 
-                GUILayout.BeginHorizontal();
-                GUILayout.Label("Show BG Color select: ");
-                    if (GUILayout.Button(bgColorSelection.ToString()))
-                    {
-                        bgColorSelection = !bgColorSelection;
-                    }
-                GUILayout.EndHorizontal();
-                
-                if (bgColorSelection)
-                {
-                    GUILayout.Label("RGB: [" + bgR.ToString() + ", " + bgG.ToString() + ", " + bgB.ToString() + "]" );
-                    bgR = (byte)GUILayout.HorizontalSlider(bgR, 0f, 255f);
-                    bgG = (byte)GUILayout.HorizontalSlider(bgG, 0f, 255f);
-                    bgB = (byte)GUILayout.HorizontalSlider(bgB, 0f, 255f);
-                }
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Show BG Color select: ");
+            if (GUILayout.Button(bgColorSelection.ToString()))
+            {
+                bgColorSelection = !bgColorSelection;
+            }
+            GUILayout.EndHorizontal();
+
+            if (bgColorSelection)
+            {
+                GUILayout.Label("RGB: [" + bgR.ToString() + ", " + bgG.ToString() + ", " + bgB.ToString() + "]");
+                bgR = (byte)GUILayout.HorizontalSlider(bgR, 0f, 255f);
+                bgG = (byte)GUILayout.HorizontalSlider(bgG, 0f, 255f);
+                bgB = (byte)GUILayout.HorizontalSlider(bgB, 0f, 255f);
+            }
 
 
-                GUILayout.Space(20);
+            GUILayout.Space(20);
 
-                GUILayout.Box("Animation Options");
-                GUILayout.BeginHorizontal();
-                    GUILayout.Label("Current Animation:");
-                    GUILayout.Label(currentAnimation);
-                GUILayout.EndHorizontal();
-            
-                GUILayout.BeginHorizontal();
-                    if (characterModel != null)
-                    {
-                        Animation anim = characterModel.gameObject.GetComponentInChildren<Animation>();
-                        GUILayout.Label("Animation time:");
-                        GUILayout.Label(Decimal.Round((decimal)animationTime, 2) + "s / " + Decimal.Round((decimal)anim[currentAnimation].length, 2).ToString() + "s");
-                    }
-                GUILayout.EndHorizontal();
+            GUILayout.Box("Animation Options");
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Current Animation:");
+            GUILayout.Label(currentAnimation);
+            GUILayout.EndHorizontal();
 
-                GUILayout.BeginHorizontal();
-                    GUILayout.Label("Play Animation");
-                    if (GUILayout.Button(animate.ToString()))
-                    {
-                        animate = !animate;
-                    }
-                GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            if (characterModel != null)
+            {
+                Animation anim = characterModel.gameObject.GetComponentInChildren<Animation>();
+                GUILayout.Label("Animation time:");
+                GUILayout.Label(Decimal.Round((decimal)animationTime, 2) + "s / " + Decimal.Round((decimal)anim[currentAnimation].length, 2).ToString() + "s");
+            }
+            GUILayout.EndHorizontal();
 
-                if (animate)
-                {
-                    GUILayout.Space(5);
-                    GUILayout.Label("Animation speed: " + Decimal.Round((decimal)animationSpeed).ToString() + " FPS");
-                    animationSpeed = GUILayout.HorizontalSlider(animationSpeed, 0f, 60f);
-                    GUILayout.Space(5);
-                } else
-                {
-                    GUILayout.Space(5);
-                    GUILayout.Label("Animation step:");
-                    animationPos = GUILayout.HorizontalSlider(animationPos, 0f, 1f);
-                    GUILayout.Space(5);
-                }
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Play Animation");
+            if (GUILayout.Button(animate.ToString()))
+            {
+                animate = !animate;
+            }
+            GUILayout.EndHorizontal();
 
-                animSelectionPos = GUILayout.BeginScrollView(animSelectionPos, false, true);
-                if (animList.Count > 0) selectedGridAnim = GUILayout.SelectionGrid(selectedGridAnim, animList.ToArray(), 1);
+            if (animate)
+            {
+                GUILayout.Space(5);
+                GUILayout.Label("Animation speed: " + Decimal.Round((decimal)animationSpeed).ToString() + " FPS");
+                animationSpeed = GUILayout.HorizontalSlider(animationSpeed, 0f, 60f);
+                GUILayout.Space(5);
+            }
+            else
+            {
+                GUILayout.Space(5);
+                GUILayout.Label("Animation step:");
+                animationPos = GUILayout.HorizontalSlider(animationPos, 0f, 1f);
+                GUILayout.Space(5);
+            }
 
-                currentAnimation = animList[selectedGridAnim];
+            animSelectionPos = GUILayout.BeginScrollView(animSelectionPos, false, true);
+            if (animList.Count > 0) selectedGridAnim = GUILayout.SelectionGrid(selectedGridAnim, animList.ToArray(), 1);
+
+            currentAnimation = animList[selectedGridAnim];
 
             GUILayout.EndScrollView();
             GUILayout.EndVertical();
