@@ -1403,6 +1403,9 @@ namespace TextureMod
                         case Character.SKATE:
                             foreach (string DLC in TextureMod.ownedDLCs) if (DLC == "Jet") proceed = true;
                             break;
+                        case Character.CANDY:
+                            foreach (string DLC in TextureMod.ownedDLCs) if (DLC == "Candyman") proceed = true;
+                            break;
                         default:
                             proceed = false;
                             break;

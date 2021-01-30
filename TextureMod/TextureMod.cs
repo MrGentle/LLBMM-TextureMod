@@ -86,6 +86,7 @@ namespace TextureMod
             if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1431702))) ownedDLCs.Add("Switch");
             if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1399790))) ownedDLCs.Add("Sonata");
             if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1431711))) ownedDLCs.Add("Jet");
+            if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1431712))) ownedDLCs.Add("Candyman");
         }
     }
 }
