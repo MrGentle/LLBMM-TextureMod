@@ -14,7 +14,7 @@ namespace TextureMod
         private static TextureMod instance = null;
         public static TextureMod Instance { get { return instance; } }
         public static void Initialize() { GameObject gameObject = new GameObject("TextureMod"); TextureMod modscript = gameObject.AddComponent<TextureMod>(); DontDestroyOnLoad(gameObject); instance = modscript; }
-        private const string modVersion = "1.4.5";
+        private const string modVersion = "1.4.6";
         private const string repositoryOwner = "Daioutzu";
         private const string repositoryName = "LLBMM-TextureMod";
 
