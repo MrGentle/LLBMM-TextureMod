@@ -1,20 +1,25 @@
-﻿using System;
-using UnityEngine;
-using LLScreen;
-using LLHandlers;
+﻿using LLHandlers;
 using LLModMenu;
+using LLScreen;
 using Multiplayer;
-using System.Collections.Generic;
 using Steamworks;
+using System;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace TextureMod
 {
     public class TextureMod : MonoBehaviour
     {
-        private static TextureMod instance = null;
-        public static TextureMod Instance { get { return instance; } }
-        public static void Initialize() { GameObject gameObject = new GameObject("TextureMod"); TextureMod modscript = gameObject.AddComponent<TextureMod>(); DontDestroyOnLoad(gameObject); instance = modscript; }
-        private const string modVersion = "1.4.6";
+        public static TextureMod Instance { get; private set; }
+        public static void Initialize()
+        {
+            GameObject gameObject = new GameObject("TextureMod", typeof(TextureMod));
+            Instance = gameObject.GetComponent<TextureMod>();
+            DontDestroyOnLoad(gameObject);
+        }
+
+        private const string modVersion = "1.4.7";
         private const string repositoryOwner = "Daioutzu";
         private const string repositoryName = "LLBMM-TextureMod";
 
@@ -29,7 +34,7 @@ namespace TextureMod
         public EffectChanger effectChanger = null;
         public ShowcaseStudio showcaseStudio = null;
 
-        public static List<string> ownedDLCs = new List<string>();
+        public static List<Character> ownedDLCs = new List<Character>();
         public static bool hasDLC = false;
 
         private void Start()
@@ -46,7 +51,7 @@ namespace TextureMod
             if (tc == null) { tc = gameObject.AddComponent<TextureChanger>(); }
             if (ec == null) { ec = gameObject.AddComponent<ExchangeClient>(); }
             if (md == null) { md = gameObject.AddComponent<ModDebugging>(); }
-            if (effectChanger == null) {effectChanger = gameObject.AddComponent<EffectChanger>(); }
+            if (effectChanger == null) { effectChanger = gameObject.AddComponent<EffectChanger>(); }
             if (showcaseStudio == null) showcaseStudio = gameObject.AddComponent<ShowcaseStudio>();
         }
 
@@ -61,10 +66,11 @@ namespace TextureMod
             GUI.skin.label.fontSize = 50;
             if ((tl == null) || UIScreen.loadingScreenActive && tl.loadingExternalFiles == true)
             {
+                GUIStyle label = new GUIStyle(GUI.skin.label);
                 var sX = Screen.width / 2;
                 var sY = UIScreen.GetResolutionFromConfig().height / 3;
                 GUI.skin.label.alignment = TextAnchor.MiddleCenter;
-                GUI.Label(new Rect(0, sY+50, Screen.width, sY), "TextureMod is loading External Textures");
+                GUI.Label(new Rect(0, sY + 50, Screen.width, sY), "TextureMod is loading External Textures");
                 GUI.skin.label.alignment = TextAnchor.MiddleLeft;
             }
             GUI.contentColor = OriginalColor;
@@ -76,17 +82,17 @@ namespace TextureMod
 
         private void CheckIfPLayerHasDLC()
         {
-            if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1244880))) ownedDLCs.Add("Dice");
-            if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1204070))) ownedDLCs.Add("Raptor");
-            if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1174410))) ownedDLCs.Add("Dust&Ashes");
-            if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(991870)) || AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1399791))) ownedDLCs.Add("Doombox");
-            if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1269880))) ownedDLCs.Add("Toxic");
-            if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1431710))) ownedDLCs.Add("Latch");
-            if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1431701))) ownedDLCs.Add("Grid");
-            if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1431702))) ownedDLCs.Add("Switch");
-            if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1399790))) ownedDLCs.Add("Sonata");
-            if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1431711))) ownedDLCs.Add("Jet");
-            if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1431712))) ownedDLCs.Add("Candyman");
+            if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1244880))) ownedDLCs.Add(Character.PONG);
+            if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1204070))) ownedDLCs.Add(Character.KID);
+            if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1174410))) ownedDLCs.Add(Character.BAG);
+            if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(991870)) || AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1399791))) ownedDLCs.Add(Character.BOSS);
+            if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1269880))) ownedDLCs.Add(Character.GRAF);
+            if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1431710))) ownedDLCs.Add(Character.CROC);
+            if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1431701))) ownedDLCs.Add(Character.ELECTRO);
+            if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1431702))) ownedDLCs.Add(Character.ROBOT);
+            if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1399790))) ownedDLCs.Add(Character.BOOM);
+            if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1431711))) ownedDLCs.Add(Character.PONG);
+            if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1431712))) ownedDLCs.Add(Character.CANDY);
         }
     }
 }

@@ -304,6 +304,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CustomSkin.cs" />
     <Compile Include="CustomStyle.cs" />
     <Compile Include="EffectChanger.cs" />
     <Compile Include="ExchangeClient.cs" />
@@ -322,6 +323,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>Xcopy $(TargetPath) "C:\Users\Dazer\Desktop\LLBMM 1.3.1\mods\$(ProjectName)" /y</PostBuildEvent>
+    <PostBuildEvent>Xcopy $(TargetPath) "C:\Users\Dazer\Desktop\LLBMM 1.3.1\mods\$(ProjectName)" /y
+Xcopy $(TargetPath) "C:\Program Files (x86)\Steam\steamapps\common\LLBlaze\LLBlaze_Data\Managed" /y</PostBuildEvent>
   </PropertyGroup>
 </Project>

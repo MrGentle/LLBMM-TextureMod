@@ -5,6 +5,7 @@ using LLScreen;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using UnityEngine;
 
 namespace TextureMod
@@ -13,8 +14,8 @@ namespace TextureMod
     {
         #region General Fields
         public static string resourceFolder = Application.dataPath.Replace("/", @"\") + @"\Managed\TextureModResources\Images\";
-        private JOFJHDJHJGI gameState;
-        private GameMode currentGameMode;
+        private JOFJHDJHJGI gameState => DNPFJHMAIBP.HHMOGKIMBNM();
+        private GameMode currentGameMode => JOMBNFKIHIC.GIGAKBJGFDI.PNJOKAICMNN;
         public string[] debug = new string[20];
         public bool doSkinPost = false;
         public int postTimer = 0;
@@ -57,7 +58,7 @@ namespace TextureMod
         public ALDOKEMAOMB localLobbyPlayer = null;
         private CharacterModel localLobbyPlayerModel = null;
         private PlayerEntity localGamePlayerEntity = null;
-        public string localPlayerName = "";
+        public int localPlayerNr = -1;
         public Character localPlayerChar = Character.NONE;
         public CharacterVariant localPlayerCharVar = CharacterVariant.CORPSE;
         public Texture2D localTex = null;
@@ -72,7 +73,7 @@ namespace TextureMod
         public ALDOKEMAOMB opponentPlayer = null;
         private CharacterModel opponentLobbyCharacterModel = null;
         private PlayerEntity opponentPlayerEntity = null;
-        public string opponentPlayerName = "";
+        public int opponentPlayerNr = -1;
         public Character opponentCustomSkinCharacter = Character.NONE;
         public CharacterVariant opponentCustomSkinCharacterVariant = CharacterVariant.CORPSE;
         public Texture2D opponentCustomTexture = null;
@@ -118,6 +119,7 @@ namespace TextureMod
 
         private void OnGUI()
         {
+
             if (localTex != null) //Show skin nametags
             {
                 GUI.skin.box.wordWrap = false;
@@ -214,18 +216,8 @@ namespace TextureMod
             if (reloadCustomSkinTimer > 0) reloadCustomSkinTimer--;
         } //POST and GET requests
 
-        private void Update()
+        void ModMenuInit()
         {
-
-#if DEBUG
-            if (Input.GetKeyDown(KeyCode.PageDown))
-            {
-                InitLocalPlayer();
-                InitOpponentPlayer();
-            } 
-#endif
-
-            #region Set MMI Config Vars
             if (TextureMod.Instance.MMI != null)
             {
                 var mmi = TextureMod.Instance.MMI;
@@ -243,11 +235,19 @@ namespace TextureMod
                 skinReloadIntervalInFrames = mmi.GetSliderValue("(slider)skinReloadIntervalInFrames");
                 assignFirstSkinOnCharacterSelection = mmi.GetTrueFalse(mmi.configBools["(bool)assignFirstSkinOnCharacterSelection"]);
             }
-            #endregion
-            #region Set Static Vars
-            gameState = DNPFJHMAIBP.HHMOGKIMBNM();
-            currentGameMode = JOMBNFKIHIC.GIGAKBJGFDI.PNJOKAICMNN;
-            #endregion
+        }
+
+        private void Update()
+        {
+#if DEBUG
+            if (Input.GetKeyDown(KeyCode.PageDown))
+            {
+                InitLocalPlayer();
+                InitOpponentPlayer();
+            } 
+#endif
+
+            ModMenuInit();
             #region Set Debug Vars
             if (showDebugInfo)
             {
@@ -272,7 +272,7 @@ namespace TextureMod
                 try { md.AddToWindow("Local Player", "Lobby Player", localLobbyPlayer.ToString()); } catch { md.AddToWindow("Local Player", "Lobby Player", "null"); }
                 try { md.AddToWindow("Local Player", "Lobby Player Model", localLobbyPlayerModel.ToString()); } catch { md.AddToWindow("Local Player", "Lobby Player Model", "null"); }
                 try { md.AddToWindow("Local Player", "Game PlayerEntity", localGamePlayerEntity.ToString()); } catch { md.AddToWindow("Local Player", "Game PlayerEntity", "null"); }
-                try { md.AddToWindow("Local Player", "Name", localPlayerName.ToString()); } catch { }
+                try { md.AddToWindow("Local Player", "Name", localPlayerNr.ToString()); } catch { }
                 try { md.AddToWindow("Local Player", "Character", localPlayerChar.ToString()); } catch { }
                 try { md.AddToWindow("Local Player", "Variant", localPlayerCharVar.ToString()); } catch { }
                 try { md.AddToWindow("Local Player", "Custom Texture", localTex.ToString()); } catch { md.AddToWindow("Local Player", "Custom Texture", "null"); }
@@ -320,7 +320,7 @@ namespace TextureMod
                 try { md.AddToWindow("Remote Player", "Lobby Player", opponentPlayer.ToString()); } catch { md.AddToWindow("Remote Player", "Lobby Player", "null"); }
                 try { md.AddToWindow("Remote Player", "Lobby Player Model", opponentLobbyCharacterModel.ToString()); } catch { md.AddToWindow("Remote Player", "Lobby Player Model", "null"); }
                 try { md.AddToWindow("Remote Player", "Game PlayerEntity", opponentPlayerEntity.ToString()); } catch { md.AddToWindow("Remote Player", "Game PlayerEntity", "null"); }
-                try { md.AddToWindow("Remote Player", "Name", opponentPlayerName.ToString()); } catch { }
+                try { md.AddToWindow("Remote Player", "Name", opponentPlayerNr.ToString()); } catch { }
                 try { md.AddToWindow("Remote Player", "Customskin Character", opponentCustomSkinCharacter.ToString()); } catch { }
                 try { md.AddToWindow("Remote Player", "Customskin Variant", opponentCustomSkinCharacterVariant.ToString()); } catch { }
                 try { md.AddToWindow("Remote Player", "Custom Texture", opponentCustomTexture.ToString()); } catch { md.AddToWindow("Remote Player", "Custom Texture", "null"); }
@@ -422,6 +422,7 @@ namespace TextureMod
 
             if (localLobbyPlayer != null && randomizedChar == false) // Determine and assign skin to local player
             {
+                //Player.Selected - Has the Player selected their character yet.
                 if (localLobbyPlayer.CHNGAKOIJFE)
                 {
                     var setNextSkin = false;
@@ -434,7 +435,6 @@ namespace TextureMod
                         else initLocalPlayer = true;
                         localPlayerChar = localLobbyPlayer.DOFCCEDJODB;
                         localPlayerCharVar = localLobbyPlayer.AIINAIDBHJI;
-
                     }
 
                     LLButton[] buttons = FindObjectsOfType<LLButton>();
@@ -444,6 +444,19 @@ namespace TextureMod
 
                     if (useOnlySetKey == false)
                     {
+                        if (UIScreen.currentScreens[0]?.screenType == ScreenType.PLAYERS)
+                        {
+                            ScreenPlayers screenPlayers = UIScreen.currentScreens[0] as ScreenPlayers;
+                            if (localLobbyPlayer.GDEMBCKIDMA.GetButtonDown(InputAction.EXPRESS_RIGHT))
+                            {
+                                setNextSkin = true;
+                            }
+                            else if (localLobbyPlayer.GDEMBCKIDMA.GetButtonDown(InputAction.EXPRESS_LEFT))
+                            {
+                                setPreviousSkin = true;
+                            }
+                        }
+
                         if (Input.GetKey(holdKey1) && buttons.Length > 0)
                         {
                             foreach (LLButton b in buttons) b.SetActive(false); //Deactivate buttons
@@ -481,6 +494,7 @@ namespace TextureMod
                             localLobbyPlayer.LALEEFJMMLH = randomChar;
 
                             localTex = GetLoadedTexture(randomChar, localTex, false, true);
+
                             if (InLobby(GameType.Online))
                             {
                                 gameStatesOnlineLobby.EMFKKOJEIPN(localLobbyPlayer.CJFLMDNNMIE, true); //Set Ready
@@ -589,7 +603,7 @@ namespace TextureMod
                                 }
 
                                 AssignTextureToIngameCharacter(localGamePlayerEntity, localTex);
-                                localPlayerName = AssignTextureToHud(localGamePlayerEntity, localTex);
+                                localPlayerNr = AssignTextureToHud(localGamePlayerEntity, localTex);
                             }
                         }
                     }
@@ -681,7 +695,7 @@ namespace TextureMod
                             if (localTex != null)
                             {
                                 AssignTextureToIngameCharacter(localGamePlayerEntity, localTex);
-                                localPlayerName = AssignTextureToHud(localGamePlayerEntity, localTex);
+                                localPlayerNr = AssignTextureToHud(localGamePlayerEntity, localTex);
                             }
                         }
                         if (InGame(GameType.Online))
@@ -692,7 +706,7 @@ namespace TextureMod
                                 else
                                 {
                                     AssignTextureToIngameCharacter(opponentPlayerEntity, opponentCustomTexture);
-                                    opponentPlayerName = AssignTextureToHud(opponentPlayerEntity, opponentCustomTexture);
+                                    opponentPlayerNr = AssignTextureToHud(opponentPlayerEntity, opponentCustomTexture);
                                 }
                             }
                         }
@@ -701,8 +715,8 @@ namespace TextureMod
                     {
                         AssignSkinToWinnerModel();
 
-                        if (localTex != null) { AssignTextureToPostGameHud(localPlayerName, localTex); }
-                        if (opponentCustomTexture != null) AssignTextureToPostGameHud(opponentPlayerName, opponentCustomTexture);
+                        if (localTex != null) { AssignTextureToPostGameHud(localPlayerNr, localTex); }
+                        if (opponentCustomTexture != null) AssignTextureToPostGameHud(opponentPlayerNr, opponentCustomTexture);
                     }
                     else
                     {
@@ -717,25 +731,25 @@ namespace TextureMod
             if (InMenu())
             {
                 sendCancelRequestToServer = true;
-                if (UIScreen.currentScreens[1] != null)
+                if (UIScreen.currentScreens[1]?.screenType != ScreenType.UNLOCKS_SKINS)
                 {
-                    if (UIScreen.currentScreens[1].screenType != ScreenType.UNLOCKS_SKINS)
-                    {
-                        InitLocalPlayer();
-                    }
+                    InitLocalPlayer();
                 }
                 InitOpponentPlayer();
             }
 
             if (UIScreen.currentScreens[1] != null)
             {
-                if (UIScreen.currentScreens[1].screenType == ScreenType.UNLOCKS_SKINS)
+                if (UIScreen.currentScreens[1]?.screenType == ScreenType.UNLOCKS_SKINS)
                 {
                     if (siluetteTimer > 0)
                     {
-                        CharacterModel[] cms = FindObjectsOfType<CharacterModel>();
-                        foreach (CharacterModel cm in cms) cm.SetSilhouette(false);
-                        if (localTex != null) SetUnlocksCharacterModel(localTex);
+                        CharacterModel characterModel = (UIScreen.currentScreens[1] as ScreenUnlocksSkins).previewModel;
+                        if (localTex != null)
+                        {
+                            characterModel.SetSilhouette(false);
+                            AssignTextureToCharacterModelRenderers(characterModel, localTex);
+                        }
                     }
 
                     if (Input.GetKey(holdKey1))
@@ -800,7 +814,7 @@ namespace TextureMod
                         }
                     }
                 }
-                else if (UIScreen.currentScreens[1].screenType == ScreenType.UNLOCKS_CHARACTERS)
+                else if (UIScreen.currentScreens[1]?.screenType == ScreenType.UNLOCKS_CHARACTERS)
                 {
                     localTex = null;
                     intervalMode = false;
@@ -812,27 +826,23 @@ namespace TextureMod
 
             if (InGame(GameType.Any))
             {
-                if (mainBall == null) mainBall = BallHandler.instance.GetBall(0);
-                if (playersInCurrentGame.Count == 0) playersInCurrentGame = GetCharactersInGame();
-                else
+                mainBall = mainBall ?? BallHandler.instance.GetBall(0);
+                //Player.AllInMatch
+                ALDOKEMAOMB.ICOCPAFKCCE((ALDOKEMAOMB player) =>
                 {
-                    foreach (Character character in playersInCurrentGame)
+                    switch (player.DOFCCEDJODB)
                     {
-                        switch (character)
-                        {
-                            case Character.CANDY: CandymanIngameEffects(); break;
-                            case Character.BAG: AshesIngameEffects(); break;
-                            case Character.GRAF: ToxicIngameEffects(); break;
-                            case Character.ELECTRO: GridIngameEffects(); break;
-                            case Character.SKATE: JetIngameEffects(); break;
-                        }
+                        case Character.CANDY: CandymanIngameEffects(); break;
+                        case Character.BAG: AshesIngameEffects(); break;
+                        case Character.GRAF: ToxicIngameEffects(); break;
+                        case Character.ELECTRO: GridIngameEffects(); break;
+                        case Character.SKATE: JetIngameEffects(); break;
                     }
-                }
+                });
             }
             else
             {
                 mainBall = null;
-                if (playersInCurrentGame.Count > 0) playersInCurrentGame.Clear();
             }
         }
 
@@ -854,11 +864,9 @@ namespace TextureMod
 
         public bool InMenu()
         {
-            if (UIScreen.currentScreens[0] != null)
+            if (UIScreen.currentScreens[0]?.screenType == ScreenType.MENU)
             {
-                if (UIScreen.currentScreens[0].screenType == ScreenType.MENU)
-                { return true; }
-                else { return false; }
+                return true;
             }
             else return false;
         }
@@ -886,15 +894,15 @@ namespace TextureMod
             switch (gt)
             {
                 case GameType.Online:
-                    if (JOMBNFKIHIC.GDNFJCCCKDM && gameState == (JOFJHDJHJGI)19)
+                    if (JOMBNFKIHIC.GDNFJCCCKDM && gameState == (JOFJHDJHJGI)19 && UIScreen.loadingScreenActive == false)
                     { return true; }
                     break;
                 case GameType.Offline:
-                    if ((!JOMBNFKIHIC.GDNFJCCCKDM) && gameState == (JOFJHDJHJGI)19)
+                    if ((!JOMBNFKIHIC.GDNFJCCCKDM) && gameState == (JOFJHDJHJGI)19 && UIScreen.loadingScreenActive == false)
                     { return true; }
                     break;
                 case GameType.Any:
-                    if ((!JOMBNFKIHIC.GDNFJCCCKDM || JOMBNFKIHIC.GDNFJCCCKDM) && gameState == (JOFJHDJHJGI)19)
+                    if ((!JOMBNFKIHIC.GDNFJCCCKDM || JOMBNFKIHIC.GDNFJCCCKDM) && gameState == (JOFJHDJHJGI)19 && UIScreen.loadingScreenActive == false)
                     { return true; }
                     break;
             }
@@ -973,23 +981,8 @@ namespace TextureMod
                 {
                     foreach (Renderer r in rs)
                     {
-                        switch (model.character)
-                        {
-                            case Character.BAG:
-                                AssignAshesOutlineColorToRenderer(r, model.characterVariant, tex);
-                                break;
-                            case Character.BOSS:
-                                if (model.characterVariant == CharacterVariant.MODEL_ALT3 || model.characterVariant == CharacterVariant.MODEL_ALT4) AssignDoomBoxVisualizerColorToRenderer(r, tex);
-                                else if (model.characterVariant == CharacterVariant.MODEL_ALT || model.characterVariant == CharacterVariant.MODEL_ALT2) AssignOmegaDoomboxSmearsAndArmsToRenderer(r, tex);
-                                break;
-                            case Character.GRAF:
-                                if (model.characterVariant == CharacterVariant.MODEL_ALT3 || model.characterVariant == CharacterVariant.MODEL_ALT4) AssignNurseToxicCanistersToRenderer(r, tex);
-                                break;
-                        }
-
-                        r.material.SetTexture("_MainTex", tex);
+                        AssignTextureToRenderer(r, tex);
                     }
-
                 }
             }
             catch { }
@@ -1014,28 +1007,20 @@ namespace TextureMod
                 {
                     foreach (Renderer r in ve.skinRenderers)
                     {
-                        if (!r.gameObject.name.EndsWith("Outline"))
-                        {
-                            r.material.SetTexture("_MainTex", tex);
-                        }
+                        AssignTextureToRenderer(r, tex);
                     }
 
                     if (playerEntity.character == Character.GRAF)
                     {
                         AssignToxicEffectColors(playerEntity.player.CJFLMDNNMIE, tex, playerEntity.variant);
                     }
-                    else if (playerEntity.character == Character.BOSS)
-                    {
-                        if (playerEntity.variant == CharacterVariant.MODEL_ALT3 || playerEntity.variant == CharacterVariant.MODEL_ALT4) AssignDoomBoxVisualizerColorIngame(playerEntity, tex);
-                        else if (playerEntity.variant == CharacterVariant.MODEL_ALT || playerEntity.variant == CharacterVariant.MODEL_ALT2) AssignOmegaDoomboxSmearsAndArmsIngame(playerEntity, tex);
-                    }
                 }
             }
         }
 
-        private string AssignTextureToHud(PlayerEntity playerEntity, Texture tex)
+        private int AssignTextureToHud(PlayerEntity playerEntity, Texture tex)
         {
-            string ret = "";
+            int ret = -1;
             GameHudPlayerInfo[] ghpis = FindObjectsOfType<GameHudPlayerInfo>();
             if (ghpis.Length > 0)
             {
@@ -1048,66 +1033,141 @@ namespace TextureMod
                         {
                             foreach (Renderer r in rs)
                             {
-                                r.material.SetTexture("_MainTex", tex);
-                                if (playerEntity.character == Character.GRAF)
-                                {
-                                    CharacterVariant variant = playerEntity.variant;
-                                    if (variant == CharacterVariant.MODEL_ALT3 || variant == CharacterVariant.MODEL_ALT4)
-                                    {
-                                        AssignNurseToxicCanistersToRenderer(r, (Texture2D)tex);
-                                    }
-                                }
+                                AssignTextureToRenderer(r, tex);
                             }
                         }
-                        ret = ghpi.lbName.text;
+                        ret = ghpi.shownPlayer.CJFLMDNNMIE;
                     }
                 }
             }
             return ret;
         }
 
-        private void AssignTextureToPostGameHud(string playerName, Texture tex)
+        private void AssignTextureToPostGameHud(int playerNr, Texture tex)
         {
             PostScreen ps = FindObjectOfType<PostScreen>();
             PostSceenPlayerBar[] pspbs = ps.playerBarsByPlayer;
+
             if (pspbs.Length > 0)
             {
-                foreach (PostSceenPlayerBar pspb in pspbs)
+                Renderer[] rs = pspbs[playerNr].gameObject.transform.GetComponentsInChildren<Renderer>();
+                if (rs.Length > 0)
                 {
-                    try
+                    foreach (Renderer r in rs)
                     {
-                        if (pspb.btPlayerName.GetText() == playerName)
+                        AssignTextureToRenderer(r, tex, playerNr);
+                    }
+                }
+            }
+        }
+
+        void AssignTextureToRenderer(Renderer r, Texture tex, int playerIndex = -1, PlayerEntity playerEntity = null)
+        {
+            Character character = Character.NONE;
+            CharacterVariant characterVariant = CharacterVariant.DEFAULT;
+            playerEntity = playerEntity ?? r.transform.GetComponentInParent<PlayerEntity>();
+
+            if (playerEntity != null)
+            {
+                character = playerEntity.character;
+                characterVariant = playerEntity.variant;
+            }
+            else
+            {
+                GameHudPlayerInfo playerHud = r.transform.GetComponentInParent<GameHudPlayerInfo>();
+                if (playerHud != null)
+                {
+                    character = playerHud.shownPlayer.DOFCCEDJODB;
+                    characterVariant = playerHud.shownPlayer.AIINAIDBHJI;
+                }
+                else
+                {
+                    CharacterModel characterModel = r.transform.GetComponentInParent<CharacterModel>();
+                    if (characterModel != null)
+                    {
+                        character = characterModel.character;
+                        characterVariant = characterModel.characterVariant;
+                    }
+                    else
+                    {
+                        if (playerIndex > -1)
                         {
-                            Renderer[] rs = pspb.gameObject.transform.GetComponentsInChildren<Renderer>();
-                            if (rs.Length > 0) foreach (Renderer r in rs) r.material.SetTexture("_MainTex", tex);
+                            ALDOKEMAOMB player = ALDOKEMAOMB.MNOLFHGAIMC(playerIndex);
+                            character = player.DOFCCEDJODB;
+                            characterVariant = player.AIINAIDBHJI;
                         }
                     }
-                    catch { }
+                }
+            }
+
+            if (!r.gameObject.name.EndsWith("Outline"))
+            {
+                string materialTexName = r.material.mainTexture?.name ?? "";
+                if (characterVariant == CharacterVariant.STATIC_ALT && r.material.name.Contains("ScreenSpaceNoise"))
+                {
+                    AOOJOMIECLD modelValues = JPLELOFJOOH.NEBGBODHHCG(character, characterVariant != CharacterVariant.STATIC_ALT ? characterVariant : CharacterVariant.DEFAULT);
+                    r.material = modelValues.DMAMFHLFOJF(0, false);
+                }
+
+                if (!materialTexName.Contains("Silhouett") && materialTexName != "")
+                {
+                    r.material.SetTexture("_MainTex", tex);
+                }
+            }
+
+            if (character == Character.GRAF)
+            {
+                if (characterVariant == CharacterVariant.MODEL_ALT3 || characterVariant == CharacterVariant.MODEL_ALT4)
+                {
+                    AssignNurseToxicCanisters(r, (Texture2D)tex);
+                }
+            }
+            else if (character == Character.SKATE)
+            {
+                if (characterVariant == CharacterVariant.MODEL_ALT || characterVariant == CharacterVariant.MODEL_ALT2)
+                {
+                    AssignJetScubaVisor(r, (Texture2D)tex);
+                }
+            }
+            else if (character == Character.BOSS)
+            {
+                if (characterVariant == CharacterVariant.MODEL_ALT || characterVariant == CharacterVariant.MODEL_ALT2)
+                {
+                    AssignOmegaDoomboxSmearsAndArms(r, (Texture2D)tex);
+                }
+                else if (characterVariant == CharacterVariant.MODEL_ALT3 || characterVariant == CharacterVariant.MODEL_ALT4)
+                {
+                    AssignVisualizer(character, r, (Texture2D)tex);
+                }
+            }
+            else if (character == Character.BAG)
+            {
+                AssignAshesOutlineColor(r, characterVariant, (Texture2D)tex);
+            }
+            else if (character == Character.BOOM)
+            {
+                if (characterVariant == CharacterVariant.MODEL_ALT3 || characterVariant == CharacterVariant.MODEL_ALT4)
+                {
+                    AssignVisualizer(character, r, (Texture2D)tex);
                 }
             }
         }
 
         private void AssignSkinToWinnerModel()
         {
-            PostScreen ps = FindObjectOfType<PostScreen>();
-            if (ps != null)
+
+            if (UIScreen.currentScreens[0]?.screenType == ScreenType.GAME_RESULTS)
             {
+                PostScreen ps = UIScreen.currentScreens[0] as PostScreen;
+
                 if (localTex != null)
                 {
-                    try
-                    {
-                        if (ps.winnerCharacter == localPlayerChar && ps.winnerCharacterVariant == localPlayerCharVar) AssignTextureToCharacterModelRenderers(ps.winnerModel, localTex);
-                    }
-                    catch (Exception ex) { Debug.Log("Winner Model: " + ex); }
+                    if (ps.winnerCharacter == localPlayerChar && ps.winnerCharacterVariant == localPlayerCharVar) AssignTextureToCharacterModelRenderers(ps.winnerModel, localTex);
                 }
 
                 if (opponentCustomTexture != null)
                 {
-                    try
-                    {
-                        if (ps.winnerCharacter == opponentCustomSkinCharacter && ps.winnerCharacterVariant == opponentCustomSkinCharacterVariant) AssignTextureToCharacterModelRenderers(ps.winnerModel, opponentCustomTexture);
-                    }
-                    catch (Exception ex) { Debug.Log("Winner Model: " + ex); }
+                    if (ps.winnerCharacter == opponentCustomSkinCharacter && ps.winnerCharacterVariant == opponentCustomSkinCharacterVariant) AssignTextureToCharacterModelRenderers(ps.winnerModel, opponentCustomTexture);
                 }
             }
         }
@@ -1130,7 +1190,7 @@ namespace TextureMod
             localLobbyPlayer = null;
             localLobbyPlayerModel = null;
             localGamePlayerEntity = null;
-            localPlayerName = "";
+            localPlayerNr = -1;
             localTex = null;
             doSkinPost = false;
             postTimer = 0;
@@ -1142,12 +1202,13 @@ namespace TextureMod
             opponentPlayer = null;
             opponentLobbyCharacterModel = null;
             opponentPlayerEntity = null;
-            opponentPlayerName = "";
+            opponentPlayerNr = -1;
             opponentCustomTexture = null;
             doSkinGet = false;
             getTimer = 0;
             initOpponentPlayer = false;
         }
+
 
         private Texture2D GetLoadedTexture(Character c, Texture2D currentTexture, bool previous, bool random)
         {
@@ -1262,41 +1323,42 @@ namespace TextureMod
 
         private Texture2D GetLoadedTextureForUnlocksModel(Texture2D currentTexture, bool previous)
         {
-            Texture2D ret = null;
+            Texture2D texture = null;
             var texname = "";
             ScreenUnlocksSkins sus = FindObjectOfType<ScreenUnlocksSkins>();
 
             if (sus != null)
             {
+                var curCharactersTextures = TextureMod.Instance.tl.characterTextures[sus.character];
                 if (previous)
                 {
-                    if (currentTexture == null && TextureMod.Instance.tl.characterTextures[sus.character].ElementAt(0).Value != null)
+                    if (currentTexture == null && curCharactersTextures.ElementAt(0).Value != null)
                     {
-                        sus.ShowCharacter(sus.character, GetVariantFromFileName(sus.character, TextureMod.Instance.tl.characterTextures[sus.character].Last().Key), false);
-                        texname = TextureMod.Instance.tl.characterTextures[sus.character].Last().Key;
-                        ret = TextureMod.Instance.tl.characterTextures[sus.character].Last().Value;
+                        sus.ShowCharacter(sus.character, GetVariantFromFileName(sus.character, curCharactersTextures.Last().Key), false);
+                        texname = curCharactersTextures.Last().Key;
+                        texture = curCharactersTextures.Last().Value;
                     }
                     else
                     {
                         bool retnext = false;
-                        for (int i = TextureMod.Instance.tl.characterTextures[sus.character].Count - 1; i != -1; i--)
+                        for (int i = curCharactersTextures.Count - 1; i != -1; i--)
                         {
-                            KeyValuePair<string, Texture2D> pair = TextureMod.Instance.tl.characterTextures[sus.character].ElementAt(i);
+                            KeyValuePair<string, Texture2D> pair = curCharactersTextures.ElementAt(i);
                             if (retnext == true)
                             {
                                 sus.ShowCharacter(sus.character, GetVariantFromFileName(sus.character, pair.Key), false);
                                 texname = pair.Key;
-                                ret = pair.Value;
+                                texture = pair.Value;
                                 break;
                             }
                             else if (retnext == false && currentTexture == pair.Value)
                             {
                                 retnext = true;
-                                if (currentTexture == TextureMod.Instance.tl.characterTextures[sus.character].First().Value)
+                                if (currentTexture == curCharactersTextures.First().Value)
                                 {
-                                    sus.ShowCharacter(sus.character, GetVariantFromFileName(sus.character, TextureMod.Instance.tl.characterTextures[sus.character].Last().Key), false);
-                                    texname = TextureMod.Instance.tl.characterTextures[sus.character].Last().Key;
-                                    ret = TextureMod.Instance.tl.characterTextures[sus.character].Last().Value;
+                                    sus.ShowCharacter(sus.character, GetVariantFromFileName(sus.character, curCharactersTextures.Last().Key), false);
+                                    texname = curCharactersTextures.Last().Key;
+                                    texture = curCharactersTextures.Last().Value;
                                 }
                             }
                         }
@@ -1304,32 +1366,32 @@ namespace TextureMod
                 }
                 else
                 {
-                    if (currentTexture == null && TextureMod.Instance.tl.characterTextures[sus.character].ElementAt(0).Value != null)
+                    if (currentTexture == null && curCharactersTextures.ElementAt(0).Value != null)
                     {
-                        sus.ShowCharacter(sus.character, GetVariantFromFileName(sus.character, TextureMod.Instance.tl.characterTextures[sus.character].ElementAt(0).Key), false);
-                        texname = TextureMod.Instance.tl.characterTextures[sus.character].ElementAt(0).Key;
-                        ret = TextureMod.Instance.tl.characterTextures[sus.character].ElementAt(0).Value;
+                        sus.ShowCharacter(sus.character, GetVariantFromFileName(sus.character, curCharactersTextures.ElementAt(0).Key), false);
+                        texname = curCharactersTextures.ElementAt(0).Key;
+                        texture = curCharactersTextures.ElementAt(0).Value;
                     }
                     else
                     {
                         bool retnext = false;
-                        foreach (KeyValuePair<string, Texture2D> pair in TextureMod.Instance.tl.characterTextures[sus.character])
+                        foreach (KeyValuePair<string, Texture2D> pair in curCharactersTextures)
                         {
                             if (retnext == true)
                             {
                                 sus.ShowCharacter(sus.character, GetVariantFromFileName(sus.character, pair.Key), false);
                                 texname = pair.Key;
-                                ret = pair.Value;
+                                texture = pair.Value;
                                 break;
                             }
                             else if (retnext == false && currentTexture == pair.Value)
                             {
                                 retnext = true;
-                                if (currentTexture == TextureMod.Instance.tl.characterTextures[sus.character].Last().Value)
+                                if (currentTexture == curCharactersTextures.Last().Value)
                                 {
-                                    sus.ShowCharacter(sus.character, GetVariantFromFileName(sus.character, TextureMod.Instance.tl.characterTextures[sus.character].ElementAt(0).Key), false);
-                                    texname = TextureMod.Instance.tl.characterTextures[sus.character].ElementAt(0).Key;
-                                    ret = TextureMod.Instance.tl.characterTextures[sus.character].ElementAt(0).Value;
+                                    sus.ShowCharacter(sus.character, GetVariantFromFileName(sus.character, curCharactersTextures.ElementAt(0).Key), false);
+                                    texname = curCharactersTextures.ElementAt(0).Key;
+                                    texture = curCharactersTextures.ElementAt(0).Value;
                                 }
                             }
                         }
@@ -1342,7 +1404,7 @@ namespace TextureMod
             siluetteTimer = 5;
 
             localTexName = texname;
-            return ret;
+            return texture;
         }
 
         private string CleanTextureName(string texname)
@@ -1371,44 +1433,12 @@ namespace TextureMod
                 {
                     var proceed = false;
 
-                    switch (localPlayerC)
+                    foreach (Character DLC in TextureMod.ownedDLCs)
                     {
-                        case Character.PONG:
-                            foreach (string DLC in TextureMod.ownedDLCs) if (DLC == "Dice") proceed = true;
-                            break;
-                        case Character.KID:
-                            foreach (string DLC in TextureMod.ownedDLCs) if (DLC == "Raptor") proceed = true;
-                            break;
-                        case Character.BAG:
-                            foreach (string DLC in TextureMod.ownedDLCs) if (DLC == "Dust&Ashes") proceed = true;
-                            break;
-                        case Character.BOSS:
-                            foreach (string DLC in TextureMod.ownedDLCs) if (DLC == "Doombox") proceed = true;
-                            break;
-                        case Character.GRAF:
-                            foreach (string DLC in TextureMod.ownedDLCs) if (DLC == "Toxic") proceed = true;
-                            break;
-                        case Character.ROBOT:
-                            foreach (string DLC in TextureMod.ownedDLCs) if (DLC == "Switch") proceed = true;
-                            break;
-                        case Character.CROC:
-                            foreach (string DLC in TextureMod.ownedDLCs) if (DLC == "Latch") proceed = true;
-                            break;
-                        case Character.BOOM:
-                            foreach (string DLC in TextureMod.ownedDLCs) if (DLC == "Sonata") proceed = true;
-                            break;
-                        case Character.ELECTRO:
-                            foreach (string DLC in TextureMod.ownedDLCs) if (DLC == "Grid") proceed = true;
-                            break;
-                        case Character.SKATE:
-                            foreach (string DLC in TextureMod.ownedDLCs) if (DLC == "Jet") proceed = true;
-                            break;
-                        case Character.CANDY:
-                            foreach (string DLC in TextureMod.ownedDLCs) if (DLC == "Candyman") proceed = true;
-                            break;
-                        default:
-                            proceed = false;
-                            break;
+                        if (DLC == localPlayerC)
+                        {
+                            proceed = true;
+                        }
                     }
 
                     if (proceed)
@@ -1484,6 +1514,20 @@ namespace TextureMod
         }
         #endregion
 
+        #region Ball Effects
+        private void SetBallColors()
+        {
+            Color color = Color.grey;
+            mainBall.GetVisual("main").renderers[2].materials[0].color = color;
+            mainBall.SetColorOutlinesColor(color);
+            for (int i = 0; i < mainBall.GetVisual("main2D").meshRendererTrail.Length; i++)
+            {
+                color.a = mainBall.GetVisual("main2D").meshRendererTrail[i].material.color.a;
+                mainBall.GetVisual("main2D").meshRendererTrail[i].material.color = color;
+            }
+        }
+        #endregion
+
         #region Dust&Ashes Effects
         public void AshesIngameEffects()
         {
@@ -1494,24 +1538,13 @@ namespace TextureMod
 
         public void AssignAshesOutlineColor(PlayerEntity pe, Texture2D tex)
         {
-            Color c = new Color(1, 1, 1, 1);
-            switch (pe.variant)
-            {
-                case CharacterVariant.DEFAULT: c = tex.GetPixel(58, 438); break;
-                case CharacterVariant.ALT0: c = tex.GetPixel(58, 438); break;
-                case CharacterVariant.MODEL_ALT: c = tex.GetPixel(69, 298); break;
-                case CharacterVariant.MODEL_ALT2: c = tex.GetPixel(69, 298); break;
-                case CharacterVariant.MODEL_ALT3: c = tex.GetPixel(113, 334); break;
-                case CharacterVariant.MODEL_ALT4: c = tex.GetPixel(113, 334); break;
-            }
-
             foreach (Renderer r in pe.skinRenderers)
             {
-                if (r.name != "mesh1Outline" && r.name != "mesh1MetalOutline" && r.name != "mesh1TenguOutline" && r.name.Contains("Outline")) r.material.color = c;
+                AssignAshesOutlineColor(r, pe.variant, tex);
             }
         }
 
-        public void AssignAshesOutlineColorToRenderer(Renderer r, CharacterVariant variant, Texture2D tex)
+        public void AssignAshesOutlineColor(Renderer r, CharacterVariant variant, Texture2D tex)
         {
             Color c = new Color(1, 1, 1, 1);
             switch (variant)
@@ -1528,6 +1561,7 @@ namespace TextureMod
         }
 
         #endregion
+
         #region Candyman Effects
         public void CandymanIngameEffects()
         {
@@ -1548,57 +1582,75 @@ namespace TextureMod
         {
             if (tex == null)
             {
-                VisualEntity pve = pe.gameObject.GetComponent<VisualEntity>();
-                tex = (Texture2D)pve.skinRenderers.First().material.mainTexture;
+                tex = (Texture2D)pe.skinRenderers.First().material.mainTexture;
             }
 
-            VisualEntity ve = ball.gameObject.GetComponentInChildren<VisualEntity>();
-            foreach (Renderer r in ve.skinRenderers)
-            {
-                if (r.name == "mesh001_MainRenderer" || r.name == "mesh001Strait_MainRenderer")
-                {
-                    r.material.mainTexture = tex;
-                }
-            }
+            ball.GetVisual($"candyBall{(int)pe.variant}Visual").mainRenderer.material.mainTexture = tex;
         }
 
+        int lastCandyBallPlayerIndex = -1;
         public void AssignSkinColorToCandySplash()
         {
-            VisualEntity[] ves = FindObjectsOfType<VisualEntity>();
-            foreach (VisualEntity v in ves)
+            EffectEntity[] effects = FindObjectsOfType<EffectEntity>();
+            if (mainBall.ballData.ballState == BallState.CANDYBALL)
             {
-                if (v.name == "candySplash")
-                {
-                    Texture2D tex = null;
-                    CandyPlayer[] cps = FindObjectsOfType<CandyPlayer>();
-                    foreach (CandyPlayer cp in cps)
-                    {
-                        if (cp.player.CJFLMDNNMIE == localGamePlayerEntity.player.CJFLMDNNMIE && localTex != null)
-                        {
-                            if (localGamePlayerEntity.GetCurrentAbilityState().name.Contains("CROUCH") && (localGamePlayerEntity.moveableData.onLeftWallApprox || localGamePlayerEntity.moveableData.onRightWallApprox) && !localGamePlayerEntity.moveableData.velocity.HCBCKAHGJCA(IBGCBLLKIHA.DBOMOJGKIFI)) tex = localTex;
-                            if (mainBall.ballData.ballState == BallState.CANDYBALL && mainBall.GetLastPlayerHitter() == localGamePlayerEntity) tex = localTex;
-                        }
+                lastCandyBallPlayerIndex = mainBall.GetLastPlayerHitter().playerIndex;
+            }
 
-                        if (opponentPlayerEntity != null && opponentCustomTexture != null && tex == null)
+            if (effects != null)
+            {
+                for (int i = 0; i < effects.Length; i++)
+                {
+                    EffectEntity effect = effects[i];
+
+                    if (effect.effectData.graphicName == "candySplash")
+                    {
+                        Texture2D tex = CheckPlayerOrMainBallSplashEffect(localGamePlayerEntity, effect, localTex) ?? CheckPlayerOrMainBallSplashEffect(opponentPlayerEntity, effect, localTex) ?? null;
+
+                        if (tex != null)
                         {
-                            if (cp.player.CJFLMDNNMIE == opponentPlayerEntity.player.CJFLMDNNMIE && opponentCustomTexture != null)
+                            SetCandySplashEffect(effects[i], tex);
+                            for (int j = 0; j < effects.Length; j++)
                             {
-                                if ((opponentPlayerEntity.moveableData.onLeftWallApprox || opponentPlayerEntity.moveableData.onRightWallApprox) && !opponentPlayerEntity.moveableData.velocity.HCBCKAHGJCA(IBGCBLLKIHA.DBOMOJGKIFI)) tex = opponentCustomTexture;
-                                if (mainBall.ballData.ballState == BallState.CANDYBALL && mainBall.GetLastPlayerHitter() == opponentPlayerEntity) tex = opponentCustomTexture;
+                                //Searches for the intiial candySplash and sets it to custom texture
+                                if (effects[j].effectData.graphicName == "candySplash" && effects[j].effectData.active)
+                                {
+                                    SetCandySplashEffect(effects[j], tex);
+                                }
                             }
                         }
-                    }
-                    Renderer[] rs = v.GetComponentsInChildren<Renderer>();
-                    foreach (var r in rs)
-                    {
-                        r.material.mainTexture = candySplashWhite;
-                        r.material.color = tex.GetPixel(103, 473);
-                        v.name = "candySplashModified";
                     }
                 }
             }
         }
         #endregion
+
+        Texture2D CheckPlayerOrMainBallSplashEffect(PlayerEntity playerEntity, EffectEntity effect, Texture2D characterTex)
+        {
+            if (playerEntity?.character == Character.CANDY && characterTex != null)
+            {
+                bool playerNearEffect = HHBCPNCDNDH.HPLPMEAOJPM(IBGCBLLKIHA.FCKBPDNEAOG(playerEntity.GetPosition(), effect.GetPosition()).KEMFCABCHLO, HHBCPNCDNDH.NKKIFJJEPOL(0.2m));
+                bool ballNearEffect = HHBCPNCDNDH.HPLPMEAOJPM(IBGCBLLKIHA.FCKBPDNEAOG(mainBall.GetPosition(), effect.GetPosition()).KEMFCABCHLO, HHBCPNCDNDH.NKKIFJJEPOL(0.6m));
+                if (playerNearEffect && !playerEntity.moveableData.velocity.HCBCKAHGJCA(IBGCBLLKIHA.DBOMOJGKIFI) && playerEntity.abilityData.abilityState.Contains("CROUCH"))
+                {
+                    return characterTex;
+                }
+                else if (ballNearEffect && lastCandyBallPlayerIndex == playerEntity.playerIndex)
+                {
+                    return characterTex;
+                }
+            }
+            return null;
+        }
+
+        void SetCandySplashEffect(EffectEntity effect, Texture2D tex)
+        {
+            Renderer r = effect.GetVisual("main").mainRenderer;
+            r.material.mainTexture = candySplashWhite;
+            r.material.color = (localGamePlayerEntity.variant == CharacterVariant.MODEL_ALT3 || localGamePlayerEntity.variant == CharacterVariant.MODEL_ALT4) ? tex.GetPixel(130, 92) : tex.GetPixel(103, 473);
+            effect.effectData.graphicName = "candySplashModified";
+        }
+
         #region Grid effects
         public void GridIngameEffects()
         {
@@ -1660,63 +1712,34 @@ namespace TextureMod
         }
 
         #endregion
+
         #region Doombox Effects
-        public void AssignDoomBoxVisualizerColorIngame(PlayerEntity pe, Texture2D tex)
+        public void AssignVisualizer(PlayerEntity pe, Texture2D tex)
         {
-            Color c1 = tex.GetPixel(493, 510);
-            Color c2 = tex.GetPixel(508, 510);
-            FNDGCLEDHAD visualizer = pe.GetVisual("main").mainRenderer.gameObject.GetComponent<FNDGCLEDHAD>();
-            Material vismat = visualizer.FHAMOPAJHNJ;
-            vismat.SetColor("_AmpColor0", c1);
-            vismat.SetColor("_AmpColor1", c2);
+            AssignVisualizer(pe.character, pe.GetVisual("main").mainRenderer, tex);
         }
 
-        public void AssignDoomBoxVisualizerColorToRenderer(Renderer r, Texture2D tex)
+        void AssignVisualizer(Character character, Renderer r, Texture2D tex)
         {
-            if (r.gameObject.GetComponent<FNDGCLEDHAD>() != null)
+            FNDGCLEDHAD visualizer = r.gameObject.GetComponentInParent<FNDGCLEDHAD>();
+            if (visualizer != null)
             {
-                Color c1 = tex.GetPixel(493, 510);
-                Color c2 = tex.GetPixel(508, 510);
-                FNDGCLEDHAD visualizer = r.gameObject.GetComponent<FNDGCLEDHAD>();
+                Color c1 = character == Character.BOSS ? tex.GetPixel(493, 510) : tex.GetPixel(82, 10);
+                Color c2 = character == Character.BOSS ? tex.GetPixel(508, 510) : tex.GetPixel(96, 10);
+
                 Material vismat = visualizer.FHAMOPAJHNJ;
+                vismat.mainTexture = tex;
                 vismat.SetColor("_AmpColor0", c1);
                 vismat.SetColor("_AmpColor1", c2);
             }
         }
 
-        public void AssignOmegaDoomboxSmearsAndArmsIngame(PlayerEntity pe, Texture2D tex)
+        public void AssignOmegaDoomboxSmearsAndArms(PlayerEntity pe, Texture2D tex)
         {
-
-            Color arm1 = tex.GetPixel(28, 336);
-            Color arm2 = tex.GetPixel(28, 325);
-
-            Color bright1 = tex.GetPixel(113, 336);
-            Color bright2 = tex.GetPixel(113, 325);
-
-            Color alpha = tex.GetPixel(178, 332);
-
-            VisualEntity ve = pe.gameObject.GetComponent<VisualEntity>();
-            if (ve != null)
-            {
-                if (ve.skinRenderers.Count > 0)
-                {
-                    foreach (Renderer r in ve.skinRenderers)
-                    {
-                        foreach (Material m in r.materials)
-                        {
-                            if (m.name.Contains("bossOmegaGlassMat") || m.name.Contains("bossOmegaEffectMat"))
-                            {
-                                m.SetColor("_LitColor", new Color(arm1.r, arm1.g, arm1.b, bright1.r));
-                                m.SetColor("_ShadowColor", new Color(arm2.r, arm2.g, arm2.b, bright2.r));
-                                m.SetFloat("_Transparency", alpha.r);
-                            }
-                        }
-                    }
-                }
-            }
+            AssignOmegaDoomboxSmearsAndArms(pe.GetVisual("main").mainRenderer, tex);
         }
 
-        public void AssignOmegaDoomboxSmearsAndArmsToRenderer(Renderer r, Texture2D tex)
+        public void AssignOmegaDoomboxSmearsAndArms(Renderer r, Texture2D tex)
         {
             Color arm1 = tex.GetPixel(28, 336);
             Color arm2 = tex.GetPixel(28, 325);
@@ -1730,6 +1753,7 @@ namespace TextureMod
             {
                 if (m.name.Contains("bossOmegaGlassMat") || m.name.Contains("bossOmegaEffectMat"))
                 {
+                    m.SetTexture("_MainTex", tex);
                     m.SetColor("_LitColor", new Color(arm1.r, arm1.g, arm1.b, bright1.r));
                     m.SetColor("_ShadowColor", new Color(arm2.r, arm2.g, arm2.b, bright2.r));
                     m.SetFloat("_Transparency", alpha.r);
@@ -1737,58 +1761,28 @@ namespace TextureMod
             }
         }
         #endregion
+
         #region Toxic Effects
 
         public void ToxicIngameEffects()
         {
             if (localGamePlayerEntity != null && localTex != null)
             {
-                if (localGamePlayerEntity.character == Character.GRAF && localGamePlayerEntity.variant == CharacterVariant.MODEL_ALT3 || localGamePlayerEntity.variant == CharacterVariant.MODEL_ALT4) AssignNurseToxicCanistersIngame(localGamePlayerEntity, localTex);
+                if (localGamePlayerEntity.character == Character.GRAF && localGamePlayerEntity.variant == CharacterVariant.MODEL_ALT3 || localGamePlayerEntity.variant == CharacterVariant.MODEL_ALT4) AssignNurseToxicCanisters(localGamePlayerEntity, localTex);
             }
             if (opponentPlayerEntity != null && opponentCustomTexture != null)
             {
-                if (opponentPlayerEntity.character == Character.GRAF && opponentPlayerEntity.variant == CharacterVariant.MODEL_ALT3 || opponentPlayerEntity.variant == CharacterVariant.MODEL_ALT4) AssignNurseToxicCanistersIngame(opponentPlayerEntity, opponentCustomTexture);
+                if (opponentPlayerEntity.character == Character.GRAF && opponentPlayerEntity.variant == CharacterVariant.MODEL_ALT3 || opponentPlayerEntity.variant == CharacterVariant.MODEL_ALT4) AssignNurseToxicCanisters(opponentPlayerEntity, opponentCustomTexture);
             }
         }
 
-        public void AssignNurseToxicCanistersIngame(PlayerEntity pe, Texture2D tex)
+        public void AssignNurseToxicCanisters(PlayerEntity pe, Texture2D tex)
         {
-
-            Color light = tex.GetPixel(158, 414);
-            Color shad = tex.GetPixel(158, 406);
-
-            Color bright1 = tex.GetPixel(158, 397);
-            Color bright2 = tex.GetPixel(158, 389);
-
-            Color alpha = tex.GetPixel(158, 380);
-
-            VisualEntity ve = pe.gameObject.GetComponent<VisualEntity>();
-            if (ve != null)
-            {
-                if (ve.skinRenderers.Count > 0)
-                {
-                    foreach (Renderer r in ve.skinRenderers)
-                    {
-                        if (r.name == "meshNurse_MainRenderer")
-                        {
-                            foreach (Material m in r.materials)
-                            {
-                                if (m.name.Contains("grafNurseGlass"))
-                                {
-                                    m.SetColor("_LitColor", new Color(light.r, light.g, light.b, bright1.r));
-                                    m.SetColor("_ShadowColor", new Color(shad.r, shad.g, shad.b, bright2.r));
-                                    m.SetFloat("_Transparency", alpha.r);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            AssignNurseToxicCanisters(pe.GetVisual("main").mainRenderer, tex);
         }
 
-        public void AssignNurseToxicCanistersToRenderer(Renderer r, Texture2D tex)
+        public void AssignNurseToxicCanisters(Renderer r, Texture2D tex)
         {
-
             Color light = tex.GetPixel(158, 414);
             Color shad = tex.GetPixel(158, 406);
 
@@ -1801,12 +1795,12 @@ namespace TextureMod
             {
                 if (m.name.Contains("grafNurseGlass"))
                 {
+                    m.SetTexture("_MainTex", tex);
                     m.SetColor("_LitColor", new Color(light.r, light.g, light.b, bright1.r));
                     m.SetColor("_ShadowColor", new Color(shad.r, shad.g, shad.b, bright2.r));
                     m.SetFloat("_Transparency", alpha.r);
                 }
             }
-
         }
 
         public void AssignToxicEffectColors(int playerId, Texture2D tex, CharacterVariant cv)
@@ -1826,11 +1820,45 @@ namespace TextureMod
 
 
         #endregion
+
         #region Jet Effects
         public void JetIngameEffects()
         {
             if (mainBall.GetLastPlayerHitter() == localGamePlayerEntity && localTex != null) AssignBubbleVisual(localGamePlayerEntity.variant, localTex);
             if (mainBall.GetLastPlayerHitter() == opponentPlayerEntity && opponentCustomTexture != null) AssignBubbleVisual(opponentPlayerEntity.variant, opponentCustomTexture);
+
+            if (localGamePlayerEntity != null && localTex != null)
+            {
+                if (localGamePlayerEntity.variant == CharacterVariant.MODEL_ALT || localGamePlayerEntity.variant == CharacterVariant.MODEL_ALT2) AssignJetScubaVisor(localGamePlayerEntity, localTex);
+            }
+
+            if (opponentPlayerEntity != null && opponentCustomTexture != null)
+            {
+                if (opponentPlayerEntity.variant == CharacterVariant.MODEL_ALT || opponentPlayerEntity.variant == CharacterVariant.MODEL_ALT2) AssignJetScubaVisor(opponentPlayerEntity, opponentCustomTexture);
+            }
+        }
+        public void AssignJetScubaVisor(PlayerEntity pe, Texture2D tex)
+        {
+            AssignJetScubaVisor(pe.GetVisual("main").mainRenderer, tex);
+        }
+
+        public void AssignJetScubaVisor(Renderer r, Texture2D tex)
+        {
+            Color light = tex.GetPixel(60, 328);
+            Color shad = tex.GetPixel(60, 325);
+
+            Color transparency = tex.GetPixel(60, 322);
+
+            foreach (Material m in r.materials)
+            {
+                if (m.name.Contains("skateScubaGlass"))
+                {
+                    m.SetTexture("_MainTex", tex);
+                    m.SetColor("_LitColor", new Color(light.r, light.g, light.b, transparency.g));
+                    m.SetColor("_ShadowColor", new Color(shad.r, shad.g, shad.b, transparency.b));
+                    m.SetFloat("_Transparency", transparency.r);
+                }
+            }
         }
 
         public void AssignBubbleVisual(CharacterVariant variant, Texture2D tex)

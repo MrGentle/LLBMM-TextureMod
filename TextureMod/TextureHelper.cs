@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
-using System.IO;
 
 namespace TextureMod
 {
@@ -42,12 +42,17 @@ namespace TextureMod
                 }
             }
 
-            tex = new Texture2D(512, 512, TextureFormat.RGBA32, true, false);
+            string texName = Path.GetFileNameWithoutExtension(fullPath);
+
+            tex = new Texture2D(512, 512, TextureFormat.RGBA32, true, false)
+            {
+                name = texName,
+                filterMode = FilterMode.Trilinear,
+                anisoLevel = 9,
+                mipMapBias = -0.5f,
+            };
             tex.LoadImage(spriteBytes); //This resizes the texture width and height
-            tex.filterMode = FilterMode.Trilinear;
-            tex.anisoLevel = 9;
-            tex.mipMapBias = -0.5f;
-            
+
 
             return tex;
         }
@@ -60,10 +65,23 @@ namespace TextureMod
             string characterDirectory = "";
             string skinName = "";
 
-            foreach (string path in TL.chars) if (TL.StringToChar(Path.GetFileName(path)) == _character) characterDirectory = path;
+            foreach (string path in TL.chars)
+            {
+                if (TL.StringToChar(Path.GetFileName(path)) == _character)
+                {
+                    characterDirectory = path;
+                }
+            }
+
             Debug.Log("characterDirectory:" + characterDirectory);
 
-            foreach (var skin in TL.characterTextures[_character]) if (skin.Value == _texture) skinName = skin.Key;
+            foreach (var skin in TL.characterTextures[_character])
+            {
+                if (skin.Value == _texture)
+                {
+                    skinName = skin.Key;
+                }
+            }
 
             string oldSkinName = skinName;
 
@@ -77,7 +95,9 @@ namespace TextureMod
             {
                 foreach (string file in Directory.GetFiles(dir))
                 {
-                    if (Path.GetFileName(file) == skinName)
+
+                    Debug.Log($"File: {file} : {skinName}");
+                    if (Path.GetFileNameWithoutExtension(file) == skinName)
                     {
                         newTex = LoadPNG(file);
                         TL.characterTextures[_character][oldSkinName] = newTex;
@@ -87,7 +107,8 @@ namespace TextureMod
 
             foreach (string file in Directory.GetFiles(characterDirectory))
             {
-                if (Path.GetFileName(file) == skinName)
+                Debug.Log($"File: {file} : {skinName}");
+                if (Path.GetFileNameWithoutExtension(file) == skinName)
                 {
                     newTex = LoadPNG(file);
                     TL.characterTextures[_character][skinName] = newTex;

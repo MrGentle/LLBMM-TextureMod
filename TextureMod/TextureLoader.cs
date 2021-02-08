@@ -1,7 +1,9 @@
-﻿using LLScreen;
+﻿using LLHandlers;
+using LLScreen;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 
@@ -12,6 +14,7 @@ namespace TextureMod
         private static string resourceFolder = Application.dataPath.Replace("/", @"\") + @"\Managed\TextureModResources\Images\Characters\";
         public List<string> chars = new List<string>();
         public Dictionary<Character, Dictionary<string, Texture2D>> characterTextures = new Dictionary<Character, Dictionary<string, Texture2D>>();
+        const string regexFilter = @"^\d+#";
 
         public bool loadingExternalFiles = true;
         public bool hasCactuar = false;
@@ -32,71 +35,87 @@ namespace TextureMod
                 chars.Add(path);
             }
 
-            foreach (string character in chars)
+            foreach (string characterFolder in chars)
             {
+
                 Dictionary<string, Texture2D> skins = new Dictionary<string, Texture2D>();
-                foreach (string dir in Directory.GetDirectories(character))
+                Character character = StringToChar(Path.GetFileName(characterFolder));
+                bool hasDLC = CheckHasDLCForCharacter(character);
+
+                foreach (string file in Directory.GetFiles(characterFolder, "*.png", SearchOption.TopDirectoryOnly))
                 {
-                    foreach (string file in Directory.GetFiles(dir))
+                    ModelVariant modelVariant = ModelVariantFromFile(file);
+                    if (modelVariant == ModelVariant.DLC && hasDLC == false)
                     {
-                        string cleanfile = Path.GetFileName(file);
-                        if (cleanfile.Contains("#"))
+                        continue;
+                    }
+
+                    string cleanName = Path.GetFileNameWithoutExtension(file);
+                    cleanName = Regex.Replace(cleanName, regexFilter, "");
+                    skins.Add(cleanName, TextureHelper.LoadPNG(file));
+                }
+
+
+                foreach (string dir in Directory.GetDirectories(characterFolder))
+                {
+                    string authorName = Path.GetFileName(dir);
+                    authorName = Regex.Replace(authorName, regexFilter, "");
+
+                    foreach (string file in Directory.GetFiles(dir, "*.png", SearchOption.TopDirectoryOnly))
+                    {
+                        ModelVariant modelVariant = ModelVariantFromFile(file);
+                        if (modelVariant == ModelVariant.DLC && hasDLC == false)
                         {
-                            List<char> charsFile = cleanfile.ToCharArray().ToList();
-                            for (var i = 0; i < charsFile.Count; i++)
-                            {
-                                if (charsFile[0] != '#') charsFile.RemoveAt(0);
-                                else
-                                {
-                                    charsFile.RemoveAt(0);
-                                    break;
-                                }
-                            }
-                            cleanfile = new string(charsFile.ToArray());
+                            continue;
                         }
 
-                        string cleanDir = Path.GetFileName(dir);
-                        if (cleanDir.Contains("#"))
-                        {   
-                            List<char> charsDir = cleanDir.ToCharArray().ToList();
-                            for (var i = 0; i < charsDir.Count; i++)
-                            {
-                                if (charsDir[0] != '#') charsDir.RemoveAt(0);
-                                else
-                                {
-                                    charsDir.RemoveAt(0);
-                                    break;
-                                }
-                            }
-                            cleanDir = new string(charsDir.ToArray());
-                        }
+                        string cleanName = Path.GetFileNameWithoutExtension(file);
+                        cleanName = Regex.Replace(cleanName, regexFilter, "");
 
-                        skins.Add(cleanfile + " by " + cleanDir, TextureHelper.LoadPNG(file));
+                        skins.Add(cleanName + " by " + authorName, TextureHelper.LoadPNG(file));
                     }
                 }
-                foreach (string file in Directory.GetFiles(character))
-                {
-                    string cleanfile = Path.GetFileName(file);
-                    if (cleanfile.Contains("#"))
-                    {
-                        List<char> charsFile = cleanfile.ToCharArray().ToList();
-                        for (var i = 0; i < charsFile.Count; i++)
-                        {
-                            if (charsFile[0] != '#') charsFile.RemoveAt(0);
-                            else
-                            {
-                                charsFile.RemoveAt(0);
-                                break;
-                            }
-                        }
-                        cleanfile = new string(charsFile.ToArray());
-                    }
-                    skins.Add(cleanfile, TextureHelper.LoadPNG(file));
-                }
-                characterTextures.Add(StringToChar(Path.GetFileName(character)), skins);
+
+                characterTextures.Add(character, skins);
             }
+
             UIScreen.SetLoadingScreen(false);
             loadingExternalFiles = false;
+        }
+
+        bool CheckHasDLCForCharacter(Character character)
+        {
+            foreach (Character DLC in TextureMod.ownedDLCs)
+            {
+                if (DLC == character)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public enum ModelVariant
+        {
+            None,
+            Default,
+            Alternative,
+            DLC,
+        }
+
+        ModelVariant ModelVariantFromFile(string path)
+        {
+            string fileName = Path.GetFileNameWithoutExtension(path);
+
+            if (fileName.Contains("_ALT2"))
+            {
+                return ModelVariant.DLC;
+            }
+            else if (fileName.Contains("_ALT"))
+            {
+                return ModelVariant.Alternative;
+            }
+            else return ModelVariant.Default;
         }
 
         public Character StringToChar(string charString)

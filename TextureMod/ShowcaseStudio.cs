@@ -1,4 +1,5 @@
-﻿using LLScreen;
+﻿using LLHandlers;
+using LLScreen;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -26,7 +27,7 @@ namespace TextureMod
         Camera lightControllerCam;
         GameObject lightController;
         CharacterModel characterModel;
-        Shader mainShader;
+        Shader mainShader = Shader.Find("LethalLeague/GameplayOpaque");
         Vector3 originalCharacterRendPos;
         bool enableLight = true;
         bool bgColorSelection = false;
@@ -64,28 +65,115 @@ namespace TextureMod
             }
         }
 
-        bool initCustomStyle = false;
-
         void Start()
         {
+            CustomStyle.InitStyle();
+        }
 
+        void ShowStudio()
+        {
+            showUI = !showUI;
+            GameObject[] gos = FindObjectsOfType<GameObject>();
+            if (!showUI)
+            {
+
+                originalCharacterRendPos = SUS.characterRenderer.transform.position;
+                SUS.characterRenderer.transform.position = new Vector3(0, 0, 0);
+
+                foreach (GameObject go in gos)
+                {
+                    if (go.name.Contains("btFirst")) gameObjects.Add(go);
+                    if (go.name.Contains("btQuit")) gameObjects.Add(go);
+                    if (go.name.Contains("btPose")) gameObjects.Add(go);
+
+                    if (go.name.Contains("characterCamera"))
+                    {
+                        go.GetComponent<Camera>().enabled = false;
+                    }
+
+                    if (go.name.Contains("cameraController"))
+                    {
+                        cameraController = new GameObject("cameraControllerGentle");
+                        cameraController.transform.position = new Vector3(-2.5f, -302f, -4.4f);
+                        cameraController.transform.eulerAngles = new Vector3(3f, 132f, 0f);
+                        camControllerCam = cameraController.AddComponent<Camera>();
+                        cameraController.GetComponent<Camera>().enabled = true;
+                        cameraController.AddComponent<SmoothMouseLook>();
+                    }
+
+                    if (go.name.Contains("characterLight"))
+                    {
+                        lightController = new GameObject("lightControllerGentle");
+                        foreach (GameObject go2 in gos)
+                        {
+                            if (go2.name.Contains("characterCamera"))
+                            {
+                                lightController.transform.position = go2.transform.position;
+                                lightController.transform.rotation = go2.transform.rotation;
+                            }
+                        }
+                        Light l = lightController.AddComponent<Light>();
+                        Light cl = go.GetComponent<Light>();
+                        l.type = cl.type;
+                        l.color = cl.color;
+                        lightControllerCam = lightController.AddComponent<Camera>();
+                        lightController.AddComponent<SmoothMouseLook>();
+                        go.GetComponent<Light>().enabled = false;
+                    }
+                }
+
+                for (var i = 0; i < gameObjects.Count; i++) gameObjects[i].SetActive(false);
+
+                if (characterModel == null) characterModel = SUS.previewModel;
+                else
+                {
+                    Animation anim = characterModel.gameObject.GetComponentInChildren<Animation>();
+                    var idleIndex = 0;
+                    foreach (AnimationState state in anim)
+                    {
+                        animList.Add(state.name);
+                        if (state.name == "idle") selectedGridAnim = idleIndex;
+                        idleIndex++;
+                    }
+                }
+            }
+            else //If showui
+            {
+                SUS.characterRenderer.transform.position = originalCharacterRendPos;
+                for (var i = 0; i < gameObjects.Count; i++) gameObjects[i].SetActive(true);
+                gameObjects.Clear();
+                animList.Clear();
+
+                if (lightController != null) Destroy(lightController);
+                if (cameraController != null) Destroy(cameraController);
+
+                foreach (GameObject go in gos)
+                {
+                    if (go.name.Contains("characterCamera"))
+                    {
+                        go.GetComponent<Camera>().enabled = true;
+                    }
+
+                    if (go.name.Contains("characterLight"))
+                    {
+                        go.GetComponent<Light>().enabled = true;
+                    }
+                }
+            }
         }
 
         private void Update()
         {
+
             if (SUS == null)
             {
-                SUS = FindObjectOfType<ScreenUnlocksSkins>();
-                if (initCustomStyle == false)
+                if (UIScreen.currentScreens[1]?.screenType == ScreenType.UNLOCKS_SKINS)
                 {
-                    CustomStyle.InitStyle();
-                    initCustomStyle = true;
+                    SUS = UIScreen.currentScreens[1] as ScreenUnlocksSkins;
                 }
             }
             else
             {
-
-                if (mainShader == null) mainShader = Shader.Find("LethalLeague/GameplayOpaque");
 
                 if (Input.GetKeyDown(showcaseStudioHideHud)) hideGUI = !hideGUI;
 
@@ -95,96 +183,9 @@ namespace TextureMod
                     if (r.material.shader != mainShader && r.name.Contains("Effect")) r.material.shader = mainShader;
                 }
 
-                if (Input.GetKeyDown(enterShowcaseStudio) || (!showUI && (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.Mouse1))))
+                if (Input.GetKeyDown(enterShowcaseStudio) || (!showUI && (Controller.all.GetButtonDown(InputAction.ESC) || Controller.all.GetButtonDown(InputAction.BACK) || Controller.all.GetButtonDown(InputAction.OK) || Input.GetKeyDown(KeyCode.Mouse1))))
                 {
-                    showUI = !showUI;
-                    GameObject[] gos = FindObjectsOfType<GameObject>();
-                    if (!showUI)
-                    {
-
-                        originalCharacterRendPos = SUS.characterRenderer.transform.position;
-                        SUS.characterRenderer.transform.position = new Vector3(0, 0, 0);
-
-                        foreach (GameObject go in gos)
-                        {
-                            if (go.name.Contains("btFirst")) gameObjects.Add(go);
-                            if (go.name.Contains("btQuit")) gameObjects.Add(go);
-                            if (go.name.Contains("btPose")) gameObjects.Add(go);
-
-                            if (go.name.Contains("characterCamera"))
-                            {
-                                go.GetComponent<Camera>().enabled = false;
-                            }
-
-                            if (go.name.Contains("cameraController"))
-                            {
-                                cameraController = new GameObject("cameraControllerGentle");
-                                cameraController.transform.position = new Vector3(-2.5f, -302f, -4.4f);
-                                cameraController.transform.eulerAngles = new Vector3(3f, 132f, 0f);
-                                camControllerCam = cameraController.AddComponent<Camera>();
-                                cameraController.GetComponent<Camera>().enabled = true;
-                                cameraController.AddComponent<SmoothMouseLook>();
-                            }
-
-                            if (go.name.Contains("characterLight"))
-                            {
-                                lightController = new GameObject("lightControllerGentle");
-                                foreach (GameObject go2 in gos)
-                                {
-                                    if (go2.name.Contains("characterCamera"))
-                                    {
-                                        lightController.transform.position = go2.transform.position;
-                                        lightController.transform.rotation = go2.transform.rotation;
-                                    }
-                                }
-                                Light l = lightController.AddComponent<Light>();
-                                Light cl = go.GetComponent<Light>();
-                                l.type = cl.type;
-                                l.color = cl.color;
-                                lightControllerCam = lightController.AddComponent<Camera>();
-                                lightController.AddComponent<SmoothMouseLook>();
-                                go.GetComponent<Light>().enabled = false;
-                            }
-                        }
-
-                        for (var i = 0; i < gameObjects.Count; i++) gameObjects[i].SetActive(false);
-
-                        if (characterModel == null) characterModel = SUS.previewModel;
-                        else
-                        {
-                            Animation anim = characterModel.gameObject.GetComponentInChildren<Animation>();
-                            var idleIndex = 0;
-                            foreach (AnimationState state in anim)
-                            {
-                                animList.Add(state.name);
-                                if (state.name == "idle") selectedGridAnim = idleIndex;
-                                idleIndex++;
-                            }
-                        }
-                    }
-                    else //If showui
-                    {
-                        SUS.characterRenderer.transform.position = originalCharacterRendPos;
-                        for (var i = 0; i < gameObjects.Count; i++) gameObjects[i].SetActive(true);
-                        gameObjects.Clear();
-                        animList.Clear();
-
-                        if (lightController != null) Destroy(lightController);
-                        if (cameraController != null) Destroy(cameraController);
-
-                        foreach (GameObject go in gos)
-                        {
-                            if (go.name.Contains("characterCamera"))
-                            {
-                                go.GetComponent<Camera>().enabled = true;
-                            }
-
-                            if (go.name.Contains("characterLight"))
-                            {
-                                go.GetComponent<Light>().enabled = true;
-                            }
-                        }
-                    }
+                    ShowStudio();
                 }
 
                 if (characterModel == null) characterModel = SUS.previewModel;
