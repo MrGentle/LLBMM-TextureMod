@@ -19,7 +19,7 @@ namespace TextureMod
             DontDestroyOnLoad(gameObject);
         }
 
-        private const string modVersion = "1.4.7";
+        private const string modVersion = "1.4.9";
         private const string repositoryOwner = "Daioutzu";
         private const string repositoryName = "LLBMM-TextureMod";
 
@@ -36,6 +36,7 @@ namespace TextureMod
 
         public static List<Character> ownedDLCs = new List<Character>();
         public static bool hasDLC = false;
+        public static string loadingText = $"TextureMod is loading External Textures...";
 
         private void Start()
         {
@@ -55,7 +56,6 @@ namespace TextureMod
             if (showcaseStudio == null) showcaseStudio = gameObject.AddComponent<ShowcaseStudio>();
         }
 
-
         private void OnGUI()
         {
             var OriginalColor = GUI.contentColor;
@@ -70,7 +70,7 @@ namespace TextureMod
                 var sX = Screen.width / 2;
                 var sY = UIScreen.GetResolutionFromConfig().height / 3;
                 GUI.skin.label.alignment = TextAnchor.MiddleCenter;
-                GUI.Label(new Rect(0, sY + 50, Screen.width, sY), "TextureMod is loading External Textures");
+                GUI.Label(new Rect(0, sY + 50, Screen.width, sY), loadingText);
                 GUI.skin.label.alignment = TextAnchor.MiddleLeft;
             }
             GUI.contentColor = OriginalColor;
@@ -91,8 +91,9 @@ namespace TextureMod
             if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1431701))) ownedDLCs.Add(Character.ELECTRO);
             if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1431702))) ownedDLCs.Add(Character.ROBOT);
             if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1399790))) ownedDLCs.Add(Character.BOOM);
-            if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1431711))) ownedDLCs.Add(Character.PONG);
+            if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1431711))) ownedDLCs.Add(Character.SKATE);
             if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1431712))) ownedDLCs.Add(Character.CANDY);
+            if (AALLGKBNLBO.OEBMADMCBAE(new AppId_t(1431700))) ownedDLCs.Add(Character.COP);
         }
     }
 }

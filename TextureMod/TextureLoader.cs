@@ -1,8 +1,8 @@
 ﻿using LLHandlers;
 using LLScreen;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEngine;
 
@@ -11,10 +11,11 @@ namespace TextureMod
 {
     public class TextureLoader : MonoBehaviour
     {
-        private static string resourceFolder = Application.dataPath.Replace("/", @"\") + @"\Managed\TextureModResources\Images\Characters\";
-        public List<string> chars = new List<string>();
-        public Dictionary<Character, Dictionary<string, Texture2D>> characterTextures = new Dictionary<Character, Dictionary<string, Texture2D>>();
-        const string regexFilter = @"^\d+#";
+        private readonly string resourceFolder = Application.dataPath.Replace("/", @"\") + @"\Managed\TextureModResources\Images\Characters\";
+        public List<string> chars;
+        //public Dictionary<Character, Dictionary<string, Texture2D>> characterTextures = new Dictionary<Character, Dictionary<string, Texture2D>>();
+        public Dictionary<Character, List<CustomSkin>> newCharacterTextures = new Dictionary<Character, List<CustomSkin>>();
+        Regex regex = new Regex(@"((_ALT\d?$)|(^\d+#))");
 
         public bool loadingExternalFiles = true;
         public bool hasCactuar = false;
@@ -24,63 +25,82 @@ namespace TextureMod
             LoadLibrary();
         }
 
+        private List<string> GetCharacterFolders()
+        {
+            return new List<string>(Directory.GetDirectories(resourceFolder.Replace("/", @"\")));
+        }
+
+        public void ReloadChacterSpecificSkins(Character character)
+        {
+            List<CustomSkin> characterSkins = newCharacterTextures[character];
+            for (int i = 0; i < characterSkins.Count - 1; i++)
+            {
+                characterSkins[i].ReloadSkin();
+            }
+        }
+
         public void LoadLibrary()
         {
-            chars.Clear();
-            Resources.UnloadUnusedAssets();
-            characterTextures.Clear();
-
-            foreach (string path in Directory.GetDirectories(resourceFolder.Replace("/", @"\")))
+            try
             {
-                chars.Add(path);
-            }
+                chars?.Clear();
+                Resources.UnloadUnusedAssets();
+                newCharacterTextures.Clear();
 
-            foreach (string characterFolder in chars)
-            {
+                chars = GetCharacterFolders();
 
-                Dictionary<string, Texture2D> skins = new Dictionary<string, Texture2D>();
-                Character character = StringToChar(Path.GetFileName(characterFolder));
-                bool hasDLC = CheckHasDLCForCharacter(character);
-
-                foreach (string file in Directory.GetFiles(characterFolder, "*.png", SearchOption.TopDirectoryOnly))
+                foreach (string characterFolder in chars)
                 {
-                    ModelVariant modelVariant = ModelVariantFromFile(file);
-                    if (modelVariant == ModelVariant.DLC && hasDLC == false)
-                    {
-                        continue;
-                    }
+                    int indexer = 0;
+                    List<CustomSkin> customSkins = new List<CustomSkin>();
+                    Character character = StringToChar(Path.GetFileName(characterFolder));
+                    bool hasDLC = CheckHasDLCForCharacter(character);
 
-                    string cleanName = Path.GetFileNameWithoutExtension(file);
-                    cleanName = Regex.Replace(cleanName, regexFilter, "");
-                    skins.Add(cleanName, TextureHelper.LoadPNG(file));
-                }
-
-
-                foreach (string dir in Directory.GetDirectories(characterFolder))
-                {
-                    string authorName = Path.GetFileName(dir);
-                    authorName = Regex.Replace(authorName, regexFilter, "");
-
-                    foreach (string file in Directory.GetFiles(dir, "*.png", SearchOption.TopDirectoryOnly))
+                    foreach (string file in Directory.GetFiles(characterFolder, "*.png", SearchOption.TopDirectoryOnly))
                     {
                         ModelVariant modelVariant = ModelVariantFromFile(file);
                         if (modelVariant == ModelVariant.DLC && hasDLC == false)
                         {
                             continue;
                         }
-
                         string cleanName = Path.GetFileNameWithoutExtension(file);
-                        cleanName = Regex.Replace(cleanName, regexFilter, "");
-
-                        skins.Add(cleanName + " by " + authorName, TextureHelper.LoadPNG(file));
+                        cleanName = regex.Replace(cleanName, m => { return ""; });
+                        customSkins.Add(new CustomSkin(indexer, character, (CustomSkin.VariantType)modelVariant, cleanName, "", file));
+                        indexer++;
                     }
+
+                    foreach (string dir in Directory.GetDirectories(characterFolder))
+                    {
+                        string authorName = Path.GetFileName(dir);
+                        authorName = regex.Replace(authorName, m => { return ""; });
+
+                        foreach (string file in Directory.GetFiles(dir, "*.png", SearchOption.TopDirectoryOnly))
+                        {
+                            ModelVariant modelVariant = ModelVariantFromFile(file);
+                            if (modelVariant == ModelVariant.DLC && hasDLC == false)
+                            {
+                                continue;
+                            }
+
+                            string cleanName = Path.GetFileNameWithoutExtension(file);
+                            cleanName = regex.Replace(cleanName, m => { return ""; });
+                            customSkins.Add(new CustomSkin(indexer, character, (CustomSkin.VariantType)modelVariant, cleanName, authorName, file));
+                            indexer++;
+                        }
+                    }
+
+                    newCharacterTextures.Add(character, customSkins);
                 }
 
-                characterTextures.Add(character, skins);
+                UIScreen.SetLoadingScreen(false);
+                loadingExternalFiles = false;
             }
-
-            UIScreen.SetLoadingScreen(false);
-            loadingExternalFiles = false;
+            catch (Exception e)
+            {
+                TextureMod.loadingText = $"TextureMod failed to load textures";
+                Debug.Log($"{e}");
+                throw;
+            }
         }
 
         bool CheckHasDLCForCharacter(Character character)

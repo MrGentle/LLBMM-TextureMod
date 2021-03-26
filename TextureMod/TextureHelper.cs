@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace TextureMod
@@ -18,7 +16,6 @@ namespace TextureMod
                 Debug.Log("Could not find " + fullPath);
                 return null;
             }
-            Texture2D tex = null;
 
             byte[] spriteBytes;
             using (var fileStream = File.OpenRead(fullPath))
@@ -44,6 +41,7 @@ namespace TextureMod
 
             string texName = Path.GetFileNameWithoutExtension(fullPath);
 
+            Texture2D tex;
             tex = new Texture2D(512, 512, TextureFormat.RGBA32, true, false)
             {
                 name = texName,
@@ -56,6 +54,7 @@ namespace TextureMod
 
             return tex;
         }
+#if oldCode
 
         public static Texture2D ReloadSkin(Character _character, Texture2D _texture)
         {
@@ -118,6 +117,7 @@ namespace TextureMod
             Resources.UnloadUnusedAssets();
             return newTex;
         }
+#endif
     }
 
     public enum EChunkType : uint
@@ -214,13 +214,13 @@ namespace TextureMod
             while (aReader.BaseStream.Position < aReader.BaseStream.Length - 4)
             {
                 var chunk = new PNGChunk();
-                chunk.length = aReader.ReadUInt32BE();
+                chunk.length = BinaryReaderWriterExt.ReadUInt32BE(aReader);
                 if (aReader.BaseStream.Position >= aReader.BaseStream.Length - 4 - chunk.length)
                     break;
                 res.Add(chunk);
-                chunk.type = (EChunkType)aReader.ReadUInt32BE();
+                chunk.type = (EChunkType)BinaryReaderWriterExt.ReadUInt32BE(aReader);
                 chunk.data = aReader.ReadBytes((int)chunk.length);
-                chunk.crc = aReader.ReadUInt32BE();
+                chunk.crc = BinaryReaderWriterExt.ReadUInt32BE(aReader);
 
                 uint crc = chunk.CalcCRC();
 
@@ -237,19 +237,19 @@ namespace TextureMod
             if (aReader == null || aReader.BaseStream.Position >= aReader.BaseStream.Length - 8)
                 return null;
             var file = new PNGFile();
-            file.Signature = aReader.ReadUInt64BE();
+            file.Signature = BinaryReaderWriterExt.ReadUInt64BE(aReader);
             file.chunks = ReadChunks(aReader);
             return file;
         }
         public static void WritePNGFile(PNGFile aFile, BinaryWriter aWriter)
         {
-            aWriter.WriteUInt64BE(PNGFile.m_Signature);
+            BinaryReaderWriterExt.WriteUInt64BE(aWriter,PNGFile.m_Signature);
             foreach (var chunk in aFile.chunks)
             {
-                aWriter.WriteUInt32BE((uint)chunk.data.Length);
-                aWriter.WriteUInt32BE((uint)chunk.type);
+                BinaryReaderWriterExt.WriteUInt32BE(aWriter,(uint)chunk.data.Length);
+                BinaryReaderWriterExt.WriteUInt32BE(aWriter,(uint)chunk.type);
                 aWriter.Write(chunk.data);
-                aWriter.WriteUInt32BE(chunk.crc);
+                BinaryReaderWriterExt.WriteUInt32BE(aWriter,chunk.crc);
             }
         }
 
@@ -310,26 +310,29 @@ namespace TextureMod
 
     public static class BinaryReaderWriterExt
     {
-        public static uint ReadUInt32BE(this BinaryReader aReader)
+        public static uint ReadUInt32BE(BinaryReader aReader)
         {
             return ((uint)aReader.ReadByte() << 24) | ((uint)aReader.ReadByte() << 16)
                 | ((uint)aReader.ReadByte() << 8) | ((uint)aReader.ReadByte());
         }
-        public static ulong ReadUInt64BE(this BinaryReader aReader)
+
+        public static ulong ReadUInt64BE(BinaryReader aReader)
         {
-            return (ulong)aReader.ReadUInt32BE() << 32 | aReader.ReadUInt32BE();
+            return (ulong)ReadUInt32BE(aReader) << 32 | ReadUInt32BE(aReader);
         }
-        public static void WriteUInt32BE(this BinaryWriter aWriter, uint aValue)
+
+        public static void WriteUInt32BE(BinaryWriter aWriter, uint aValue)
         {
             aWriter.Write((byte)((aValue >> 24) & 0xFF));
             aWriter.Write((byte)((aValue >> 16) & 0xFF));
             aWriter.Write((byte)((aValue >> 8) & 0xFF));
             aWriter.Write((byte)((aValue) & 0xFF));
         }
-        public static void WriteUInt64BE(this BinaryWriter aWriter, ulong aValue)
+
+        public static void WriteUInt64BE(BinaryWriter aWriter, ulong aValue)
         {
-            aWriter.WriteUInt32BE((uint)(aValue >> 32));
-            aWriter.WriteUInt32BE((uint)(aValue));
+            WriteUInt32BE(aWriter,(uint)(aValue >> 32));
+            WriteUInt32BE(aWriter, (uint)(aValue));
         }
     }
 }
