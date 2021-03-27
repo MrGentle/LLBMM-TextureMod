@@ -846,8 +846,8 @@ namespace TextureMod
                             calculateMirror = true;
                         }
                     }
-                } 
-                else
+                }
+                else if (initLocalPlayer)
                 {
                     InitLocalPlayer();
                 }
